@@ -42,12 +42,20 @@ Full list: [mattpocock/skills](https://github.com/mattpocock/skills).
 
 ### Bundled skills (in [`skills/`](skills/))
 
-These have no maintained upstream, so they ship here. Both adapted from pstack (MIT), with its dead `~/.cursor/rules` and "principle skill" references stripped out.
+Skills with no maintained upstream, so they ship here.
 
 | Skill | What it does |
 |---|---|
 | [`arena`](skills/arena/SKILL.md) | Spawns N candidates at one task, cross-judges, picks a base, grafts the best of the losers into it |
 | [`blast-radius`](skills/blast-radius/SKILL.md) | Finds what a change breaks beyond the diff, and **proves** the one safety fact by running real code instead of writing it up |
+| [`windows-context-menu`](skills/windows-context-menu/SKILL.md) | Adds, places and de-duplicates Explorer right-click entries through the registry |
+
+`arena` and `blast-radius` are adapted from pstack (MIT), with its dead `~/.cursor/rules` and "principle skill" references stripped out.
+
+> **This folder is a mirror, do not edit it here.** The source of truth is
+> `skills/` in [dmg-windows-rice](https://github.com/DavidMGDev/dmg-windows-rice),
+> which mirrors into this folder with `robocopy /MIR`. A skill added here and
+> not there is deleted on the next sync.
 
 ### Downloaded skill
 
@@ -89,7 +97,7 @@ Want a different set? Edit `GITIGNORE_BLOCK` in [`bin/claude-init.js`](bin/claud
 
 Everything is a list at the top of [`bin/claude-init.js`](bin/claude-init.js). No other file to touch.
 
-**A skill you wrote** — drop a folder with a `SKILL.md` into `skills/`. It is picked up automatically; there is no list to update.
+**A skill you wrote** — add it to `skills/` in [dmg-windows-rice](https://github.com/DavidMGDev/dmg-windows-rice) and run its `sync-claude-init` skill, which mirrors that folder into this one. Anything with a `SKILL.md` is picked up automatically; there is no list to update.
 
 ```
 skills/
