@@ -1,13 +1,55 @@
 # claude-init
 
-One command to set up a folder for Claude Code: installs a fixed set of skills, optionally starts a git repo, and drops you into an open Claude session running `/setup-matt-pocock-skills`.
+One command to set a folder up for Claude Code: pick what you want from a list, it installs, then it opens Claude with any per-repo setup already running.
 
 ```bash
-claude-init          # install skills, open Claude
+claude-init          # pick, install, open Claude
 claude-init -g       # ...and git init first
 ```
 
-No dependencies. One file does the work: [`bin/claude-init.js`](bin/claude-init.js).
+No dependencies. Two files do the work: [`bin/claude-init.js`](bin/claude-init.js) and the picker in [`bin/pick.js`](bin/pick.js).
+
+## The picker
+
+```
+  Plugins
+  > [x] mattpocock-skills  35 skills: grilling, tdd, code-review, domain-modeling, research
+    [x] ponytail  /ponytail [lite|full|ultra], /ponytail-review, /ponytail-audit
+    [x] impeccable  /impeccable polish, /impeccable audit, /impeccable critique
+
+  Bundled skills
+    [x] arena
+    [x] blast-radius
+    [x] windows-context-menu
+
+  Downloaded skills
+    [x] no-ai-slop  petergyang, MIT. Strips AI tells from prose, keeps your voice
+
+  space toggle   a all/none   q quit
+  enter install 7, then run /setup-matt-pocock-skills in Claude Code
+```
+
+Everything starts selected. `space` toggles one, `a` toggles all, `q` quits without installing anything.
+
+**`enter` is the only key that commits, and you press it once.** It installs the selected entries, then opens Claude Code. Nothing is installed and nothing launches before it.
+
+The last line tells you what `enter` will do, and it tracks the selection. Deselect everything that carries a setup and it says so:
+
+```
+  enter install 4. No setup will run in Claude Code, it just opens.
+```
+
+Without a TTY (a pipe, CI) the picker is skipped and everything installs.
+
+## Setups
+
+Some things ship a per-repo setup command that has to run inside Claude Code once. Which ones is decided in `bin/claude-init.js`, not by the picker and not by you: an entry with a `setup` field runs that slash command after install. Select several and they run in order, in one session.
+
+| Entry | Setup |
+|---|---|
+| `mattpocock-skills` | `/setup-matt-pocock-skills` |
+
+Everything else installs and is simply available.
 
 ## Install
 
@@ -23,9 +65,19 @@ To update later: `git pull` in this folder. The link keeps pointing here, so the
 
 ## What it installs
 
-### Plugin: `mattpocock-skills`
+### Plugins
 
-Pulled from Claude Code's official marketplace, so it updates itself. 35 skills; the ones that matter most:
+Marketplace plugins, so they update themselves. A marketplace Claude Code does not already know is added automatically.
+
+| Plugin | Marketplace | Commands | Setup |
+|---|---|---|---|
+| `mattpocock-skills` | official | 35 skills, see below | `/setup-matt-pocock-skills` |
+| [`ponytail`](https://github.com/DietrichGebert/ponytail) | `DietrichGebert/ponytail` | `/ponytail [lite\|full\|ultra]`, `/ponytail-review`, `/ponytail-audit`, `/ponytail-debt`, `/ponytail-gain`, `/ponytail-help` | none |
+| [`impeccable`](https://github.com/pbakaus/impeccable) | `pbakaus/impeccable` | `/impeccable polish`, `/impeccable audit`, `/impeccable critique` | none |
+
+`ponytail` forces the laziest solution that actually works. `impeccable` is a design language for frontend work. Neither needs a setup: install and use.
+
+`mattpocock-skills` is 35 skills; the ones that matter most:
 
 | Skill | What it does |
 |---|---|
@@ -97,6 +149,8 @@ Want a different set? Edit `GITIGNORE_BLOCK` in [`bin/claude-init.js`](bin/claud
 
 Everything is a list at the top of [`bin/claude-init.js`](bin/claude-init.js). No other file to touch.
 
+Anything added to a list shows up in the picker on the next run.
+
 **A skill you wrote** — add it to `skills/` in [dmg-windows-rice](https://github.com/DavidMGDev/dmg-windows-rice) and run its `sync-claude-init` skill, which mirrors that folder into this one. Anything with a `SKILL.md` is picked up automatically; there is no list to update.
 
 ```
@@ -111,11 +165,25 @@ skills/
 { name: "some-skill", url: "https://raw.githubusercontent.com/user/repo/main/SKILL.md", label: "some-skill (user, MIT)" },
 ```
 
-**A marketplace plugin** — add a line to `PLUGINS`:
+**A marketplace plugin** — add a line to `PLUGINS`. `marketplace` is only needed when Claude Code does not already know it; `setup` is only needed when the plugin ships a per-repo setup command:
 
 ```js
-{ name: "some-plugin@some-marketplace", label: "some-plugin" },
+{
+  name: "some-plugin@some-marketplace",
+  marketplace: "user/repo",          // optional
+  label: "some-plugin",
+  about: "/its, /commands",          // shown in the picker
+  setup: "/its-setup-command",       // optional
+},
 ```
+
+## Tests
+
+```bash
+npm test
+```
+
+Covers the picker: key handling, the footer tracking the selection, and the in-place redraw staying aligned. It runs against a fake tty, since there is no tty in CI.
 
 **A different .gitignore set** — edit `GITIGNORE_BLOCK`. Keep the first and last lines as markers; the entry count in the output is derived, so nothing else needs updating.
 

@@ -1,8 +1,11 @@
 {
   "name": "claude-init",
   "version": "1.0.0",
-  "description": "Install a known set of Claude Code skills, then open Claude ready to run /setup-matt-pocock-skills.",
+  "description": "Pick Claude Code skills and plugins, install them, then open Claude with any per-repo setup already running.",
   "type": "module",
+  "scripts": {
+    "test": "node test/pick.test.js"
+  },
   "bin": {
     "claude-init": "bin/claude-init.js"
   },

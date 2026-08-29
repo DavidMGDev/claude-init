@@ -1,12 +1,16 @@
 #!/usr/bin/env node
 /**
- * claude-init - set up a repo for Claude Code with a known set of skills,
- * then hand you an open Claude session ready to run the per-repo setup.
+ * claude-init - pick a set of Claude Code skills, install them, then hand you
+ * an open Claude session with any per-repo setup already running.
  *
- * To add a skill:
- *   - local  : drop a folder with a SKILL.md into ../skills/ . Nothing else.
- *   - remote : add a line to REMOTE_SKILLS below.
- *   - plugin : add a line to PLUGINS below.
+ * To add something:
+ *   - local skill  : drop a folder with a SKILL.md into ../skills/ . Nothing else.
+ *   - remote skill : add a line to REMOTE_SKILLS below.
+ *   - plugin       : add a line to PLUGINS below.
+ *
+ * An entry with a `setup` field runs that slash command in Claude Code once
+ * everything is installed. Whether something has a setup is decided here, not
+ * by the picker and not by the user.
  */
 
 import { spawnSync } from "node:child_process";
@@ -16,21 +20,43 @@ import { homedir } from "node:os";
 import { join, dirname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { pick } from "./pick.js";
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SKILLS_DIR = join(homedir(), ".claude", "skills");
 const NET_TIMEOUT_MS = 15000;
 
-// ── What gets installed ───────────────────────────────────────────────────
+// ── What can be installed ─────────────────────────────────────────────────
 
+// `marketplace` is only needed for a marketplace Claude Code does not already
+// know. claude-plugins-official is built in.
 const PLUGINS = [
-  { name: "mattpocock-skills@claude-plugins-official", label: "mattpocock-skills (35 skills)" },
+  {
+    name: "mattpocock-skills@claude-plugins-official",
+    label: "mattpocock-skills",
+    about: "35 skills: grilling, tdd, code-review, domain-modeling, research",
+    setup: "/setup-matt-pocock-skills",
+  },
+  {
+    name: "ponytail@ponytail",
+    marketplace: "DietrichGebert/ponytail",
+    label: "ponytail",
+    about: "/ponytail [lite|full|ultra], /ponytail-review, /ponytail-audit, /ponytail-debt",
+  },
+  {
+    name: "impeccable@impeccable",
+    marketplace: "pbakaus/impeccable",
+    label: "impeccable",
+    about: "/impeccable polish, /impeccable audit, /impeccable critique",
+  },
 ];
 
 const REMOTE_SKILLS = [
   {
     name: "no-ai-slop",
     url: "https://raw.githubusercontent.com/petergyang/no-ai-slop/main/skills/no-ai-slop/SKILL.md",
-    label: "no-ai-slop (petergyang, MIT)",
+    label: "no-ai-slop",
+    about: "petergyang, MIT. Strips AI tells from prose, keeps your voice",
   },
 ];
 
@@ -49,8 +75,6 @@ const GITIGNORE_BLOCK = [
 const GITIGNORE_MARKER = GITIGNORE_BLOCK[0];
 const GITIGNORE_ENTRIES = GITIGNORE_BLOCK.filter((l) => !l.startsWith("#"));
 
-const SETUP_PROMPT = "/setup-matt-pocock-skills";
-
 // ── Output ────────────────────────────────────────────────────────────────
 
 const useColor = process.stdout.isTTY && !process.env.NO_COLOR;
@@ -61,8 +85,8 @@ const die = (m) => { console.error(`  ${c(31, "x")} ${m}`); process.exit(1); };
 const head = (m) => console.log(`\n${c(1, m)}`);
 
 const HELP = `
-  claude-init - install a known set of Claude Code skills, then open Claude
-                ready to run ${SETUP_PROMPT}.
+  claude-init - pick Claude Code skills, install them, open Claude with any
+                per-repo setup already running.
 
   Usage
     claude-init [options]
@@ -72,6 +96,13 @@ const HELP = `
     -n, --no-open   install only, do not launch Claude
     -h, --help      this
     -v, --version   version
+
+  Picker
+    up/down or j/k   move          space   toggle
+    a                all / none    enter   install and go
+    q or esc         quit, install nothing
+
+    Without a TTY (a pipe, CI) the picker is skipped and everything installs.
 
   Notes
     .gitignore gets a small block of machine-local paths when this folder is
@@ -188,55 +219,93 @@ if (!detectClaude()) {
 ok(`Claude Code ${claudeVersion}`);
 ok(`target: ${cwd}`);
 
-// ── 2. Plugins ────────────────────────────────────────────────────────────
-
-head("Plugins");
-let pluginInstalled = false;
-for (const p of PLUGINS) {
-  const r = runClaude(["plugin", "install", p.name], { quiet: true });
-  if (r.status === 0) {
-    ok(p.label);
-    pluginInstalled = true;
-  } else {
-    // Swallowing the real reason here made a failed install look like a shrug.
-    const why = ((r.stderr || "") + (r.stdout || "")).trim().split("\n").pop() || "unknown error";
-    warn(`${p.name}: ${why}`);
-    warn(`  install by hand: claude plugin install ${p.name}`);
-  }
-}
-
-// ── 3. Skills ─────────────────────────────────────────────────────────────
-
-head("Skills");
-mkdirSync(SKILLS_DIR, { recursive: true });
+// ── 2. Catalogue ──────────────────────────────────────────────────────────
 
 const localDir = join(ROOT, "skills");
-const local = existsSync(localDir)
-  ? readdirSync(localDir).filter((d) => {
-      const f = join(localDir, d, "SKILL.md");
-      return existsSync(f) && readFileSync(f, "utf8").startsWith("---");
-    })
+const localSkills = existsSync(localDir)
+  ? readdirSync(localDir)
+      .filter((d) => {
+        const f = join(localDir, d, "SKILL.md");
+        return existsSync(f) && readFileSync(f, "utf8").startsWith("---");
+      })
+      .map((name) => ({ kind: "local", group: "Bundled skills", name, label: name, checked: true }))
   : [];
-for (const name of local) {
-  const existed = existsSync(join(SKILLS_DIR, name));
-  copyDir(join(localDir, name), join(SKILLS_DIR, name));
-  ok(`${name} (bundled, ${existed ? "updated" : "installed"})`);
+
+const catalogue = [
+  ...PLUGINS.map((p) => ({ ...p, kind: "plugin", group: "Plugins", checked: true })),
+  ...localSkills,
+  ...REMOTE_SKILLS.map((s) => ({ ...s, kind: "remote", group: "Downloaded skills", checked: true })),
+];
+
+if (!catalogue.length) die("nothing to install");
+
+// ── 3. Pick ───────────────────────────────────────────────────────────────
+
+let chosen;
+if (process.stdin.isTTY && process.stdout.isTTY) {
+  head("What do you want?");
+  chosen = await pick(catalogue);
+  if (chosen === null) {
+    console.log("\n  nothing installed\n");
+    process.exit(130);
+  }
+} else {
+  chosen = catalogue;
+  head("What do you want?");
+  ok("no TTY, so installing everything");
 }
 
-for (const s of REMOTE_SKILLS) {
-  try {
-    const body = await download(s.url);
-    if (!body.startsWith("---")) throw new Error("not a SKILL.md");
-    const existed = existsSync(join(SKILLS_DIR, s.name));
-    mkdirSync(join(SKILLS_DIR, s.name), { recursive: true });
-    writeFileSync(join(SKILLS_DIR, s.name, "SKILL.md"), body);
-    ok(`${s.label}, ${existed ? "updated" : "installed"}`);
-  } catch (e) {
-    warn(`skipped ${s.name}: ${e.message}`);
+// ── 4. Install ────────────────────────────────────────────────────────────
+
+const plugins = chosen.filter((i) => i.kind === "plugin");
+let pluginInstalled = false;
+
+if (plugins.length) {
+  head("Plugins");
+  for (const p of plugins) {
+    // Adding a marketplace that is already known is a no-op, so no need to
+    // check first. Only the install result is worth reporting.
+    if (p.marketplace) runClaude(["plugin", "marketplace", "add", p.marketplace], { quiet: true });
+    // -y is required whenever stdout is not a TTY, which it is not here.
+    const r = runClaude(["plugin", "install", p.name, "-y"], { quiet: true });
+    if (r.status === 0) {
+      ok(`${p.label}  ${c(2, p.about)}`);
+      pluginInstalled = true;
+    } else {
+      // Swallowing the real reason here made a failed install look like a shrug.
+      const why = ((r.stderr || "") + (r.stdout || "")).trim().split("\n").pop() || "unknown error";
+      warn(`${p.name}: ${why}`);
+      warn(`  install by hand: claude plugin install ${p.name}`);
+    }
   }
 }
 
-// ── 4. git ────────────────────────────────────────────────────────────────
+const skills = chosen.filter((i) => i.kind !== "plugin");
+if (skills.length) {
+  head("Skills");
+  mkdirSync(SKILLS_DIR, { recursive: true });
+
+  for (const s of skills.filter((i) => i.kind === "local")) {
+    const existed = existsSync(join(SKILLS_DIR, s.name));
+    copyDir(join(localDir, s.name), join(SKILLS_DIR, s.name));
+    ok(`${s.name} (bundled, ${existed ? "updated" : "installed"})`);
+  }
+
+  for (const s of skills.filter((i) => i.kind === "remote")) {
+    try {
+      const body = await download(s.url);
+      if (!body.startsWith("---")) throw new Error("not a SKILL.md");
+      const existed = existsSync(join(SKILLS_DIR, s.name));
+      mkdirSync(join(SKILLS_DIR, s.name), { recursive: true });
+      writeFileSync(join(SKILLS_DIR, s.name, "SKILL.md"), body);
+      ok(`${s.label} (${existed ? "updated" : "installed"})  ${c(2, s.about)}`);
+    } catch (e) {
+      warn(`skipped ${s.name}: ${e.message}`);
+    }
+  }
+}
+
+// ── 5. git ────────────────────────────────────────────────────────────────
 
 head("Repo");
 
@@ -280,22 +349,34 @@ if (root) {
   ok("not a git repo, so no .gitignore written (use -g to create one)");
 }
 
-// ── 5. Hand over ──────────────────────────────────────────────────────────
+// ── 6. Hand over ──────────────────────────────────────────────────────────
+
+const setups = chosen.map((i) => i.setup).filter(Boolean);
+
+// One slash command goes in as-is. Several need an instruction around them,
+// because Claude Code only takes one prompt.
+const prompt =
+  setups.length === 1
+    ? setups[0]
+    : setups.length > 1
+      ? `Run these setup skills in order, finishing each before starting the next: ${setups.join(", ")}.`
+      : null;
 
 if (pluginInstalled) {
   head("Note");
-  console.log("  Restart Claude Code once so it picks up the new plugin.");
+  console.log("  A Claude Code session already running needs a restart to see the new plugins.");
+  console.log("  The one opened below picks them up on its own.");
 }
 
 if (noOpen) {
   head("Done");
-  console.log(`  Run this next:  claude ${SETUP_PROMPT}\n`);
+  console.log(prompt ? `  Run this next:  claude "${prompt}"\n` : "  Nothing to run. Start Claude whenever.\n");
   process.exit(0);
 }
 
 head("Opening Claude");
-console.log(`  Running ${SETUP_PROMPT}. Keep chatting from there; Ctrl-C to leave.\n`);
+console.log(prompt ? `  Running ${setups.join(" and ")}. Keep chatting from there; Ctrl-C to leave.\n` : "  No setup to run. Ctrl-C to leave.\n");
 
-const r = runClaude([SETUP_PROMPT]);
+const r = runClaude(prompt ? [prompt] : []);
 // A signal-killed child reports status null, which `?? 0` turned into success.
 process.exit(r.status ?? (r.signal ? 1 : 0));
