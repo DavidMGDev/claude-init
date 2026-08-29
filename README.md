@@ -68,24 +68,22 @@ Fetched fresh on every run, so it stays current.
 
 ## The .gitignore behaviour
 
-`/setup-matt-pocock-skills` writes scaffolding **into your repo**, so it shows up on GitHub. `claude-init` pre-ignores it, because that scaffolding is usually your own working setup rather than something the whole team wants in their diff.
-
-The block gets appended when the folder is already a git repo, **or** when `-g` just created one. Without git, nothing is written.
+`/setup-matt-pocock-skills` writes scaffolding **into your repo**, so it shows up on GitHub. Only the genuinely machine-local part gets ignored:
 
 ```gitignore
-# --- claude-init: Matt Pocock skill scaffolding ---
-docs/agents/
-docs/adr/
-CONTEXT.md
-CONTEXT-MAP.md
-CLAUDE.md
-AGENTS.md
+# --- claude-init ---
+.claude/settings.local.json
 .scratch/
-.claude/
 # --- end claude-init ---
 ```
 
-Idempotent: it checks for the marker comment, so re-running never duplicates the block, and an existing `.gitignore` is appended to, never overwritten. Want any of these tracked? Delete the line. Nothing re-adds it.
+Written at the **repo root** when you are anywhere inside a git repo, or when `-g` just created one. Without git, nothing is written.
+
+**What is deliberately not ignored:** `CLAUDE.md`, `AGENTS.md`, `CONTEXT.md`, `CONTEXT-MAP.md`, `docs/adr/` and `docs/agents/`. Those are shared project knowledge — the vocabulary, the decision records, and the instructions every agent reads. Ignoring them means each clone silently loses the setup, which defeats the point of writing them down. Commit them.
+
+Idempotent: it checks for the marker comment, so re-running never duplicates the block. An existing `.gitignore` is appended to, never overwritten, and its line endings are preserved.
+
+Want a different set? Edit `GITIGNORE_BLOCK` in [`bin/claude-init.js`](bin/claude-init.js). Keep the first and last lines as markers.
 
 ## Adding more skills
 
@@ -111,7 +109,7 @@ skills/
 { name: "some-plugin@some-marketplace", label: "some-plugin" },
 ```
 
-**A different .gitignore set** — edit `GITIGNORE_BLOCK`. Keep the first and last lines as markers.
+**A different .gitignore set** — edit `GITIGNORE_BLOCK`. Keep the first and last lines as markers; the entry count in the output is derived, so nothing else needs updating.
 
 ## Notes
 
