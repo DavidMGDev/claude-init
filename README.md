@@ -20,13 +20,14 @@ No dependencies. Two files do the work: [`bin/claude-init.js`](bin/claude-init.j
   Bundled skills
     [x] arena
     [x] blast-radius
+    [x] handoff-clip
     [ ] windows-context-menu  opt-in
 
   Downloaded skills
     [x] no-ai-slop  petergyang, MIT. Strips AI tells from prose, keeps your voice
 
   space toggle   a all/none   q quit
-  enter install 5, then run /setup-matt-pocock-skills in Claude Code
+  enter install 6, then run /setup-matt-pocock-skills in Claude Code
 ```
 
 `space` toggles one, `a` toggles all, `q` or `ctrl-c` quits without installing anything.
@@ -113,6 +114,7 @@ Skills with no maintained upstream, so they ship here.
 |---|---|
 | [`arena`](skills/arena/SKILL.md) | Spawns N candidates at one task, cross-judges, picks a base, grafts the best of the losers into it |
 | [`blast-radius`](skills/blast-radius/SKILL.md) | Finds what a change breaks beyond the diff, and **proves** the one safety fact by running real code instead of writing it up |
+| [`handoff-clip`](skills/handoff-clip/SKILL.md) | Compacts the conversation into a handoff document and prints it as one copyable block, writing no files |
 | [`windows-context-menu`](skills/windows-context-menu/SKILL.md) | Adds, places and de-duplicates Explorer right-click entries through the registry |
 
 `arena` and `blast-radius` are adapted from pstack (MIT), with its dead `~/.cursor/rules` and "principle skill" references stripped out.
