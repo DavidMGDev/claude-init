@@ -6,6 +6,13 @@
  * test/pick.test.js. There is no tty in CI and none in an agent shell.
  */
 
+// One keypress: a CSI sequence (arrows, home, F-keys), an SS3 sequence (arrows
+// again, in application cursor mode), or a single character.
+const KEY = /^(?:\x1b\[[0-9;]*[A-Za-z~]|\x1bO[A-Za-z]|[\s\S])/;
+
+// The same sequences while still arriving, with the final byte missing.
+const PARTIAL = /^\x1b(?:\[[0-9;]*|O)?$/;
+
 export function pick(items, { stdin = process.stdin, stdout = process.stdout, color = true } = {}) {
   const c = (n, s) => (color ? `\x1b[${n}m${s}\x1b[0m` : s);
 
@@ -13,6 +20,7 @@ export function pick(items, { stdin = process.stdin, stdout = process.stdout, co
     const groups = [...new Set(items.map((i) => i.group))];
     let cursor = 0;
     let drawn = 0;
+    let pending = "";
 
     const lines = () => {
       const out = [];
@@ -32,7 +40,10 @@ export function pick(items, { stdin = process.stdin, stdout = process.stdout, co
         items.forEach((it, i) => {
           if (it.group !== g) return;
           const prefix = `  ${i === cursor ? ">" : " "} ${it.checked ? "[x]" : "[ ]"} `;
-          const body = `${it.label}${it.about ? "  " + it.about : ""}`.slice(0, Math.max(0, width - prefix.length));
+          // Say which entries are off by default. The checkbox alone stops
+          // telling you that the moment you toggle one.
+          const note = it.optIn ? ["opt-in", it.about].filter(Boolean).join(" - ") : it.about;
+          const body = `${it.label}${note ? "  " + note : ""}`.slice(0, Math.max(0, width - prefix.length));
           const label = body.slice(0, it.label.length);
           row(prefix + body, (i === cursor ? c(36, prefix) : prefix) + label + c(2, body.slice(it.label.length)));
         });
@@ -54,10 +65,16 @@ export function pick(items, { stdin = process.stdin, stdout = process.stdout, co
 
     const render = () => {
       const out = lines();
-      // Redraw in place. Anything that changes the printed line count between
-      // renders would leave debris here, so the layout is fixed.
-      if (drawn) stdout.write(`\x1b[${drawn}A\x1b[0J`);
-      stdout.write(out.join("\n") + "\n");
+      // Draw over the old frame instead of erasing it first. Blanking the
+      // region and then filling it is two states on screen, and at 60Hz that
+      // reads as a flash on every keypress. \x1b[K wipes each line's tail as
+      // that line is rewritten, so there is never a blank moment, and the
+      // trailing \x1b[0J only clears rows a shorter frame left behind.
+      //
+      // It all goes out in one write() for the same reason: two writes is two
+      // frames, and the terminal is free to paint between them.
+      const frame = out.map((l) => l + "\x1b[K").join("\n") + "\n\x1b[0J";
+      stdout.write((drawn ? `\x1b[${drawn}A` : "") + frame);
       drawn = out.length;
     };
 
@@ -69,18 +86,35 @@ export function pick(items, { stdin = process.stdin, stdout = process.stdout, co
       resolve(result);
     };
 
-    const onKey = (buf) => {
-      const k = buf.toString();
-      if (k === "\x03" || k === "q" || k === "\x1b") return done(null);
-      if (k === "\x1b[A" || k === "k") cursor = (cursor - 1 + items.length) % items.length;
-      else if (k === "\x1b[B" || k === "j") cursor = (cursor + 1) % items.length;
-      else if (k === " ") items[cursor].checked = !items[cursor].checked;
-      else if (k === "a" || k === "A") {
-        const all = items.every((i) => i.checked);
-        items.forEach((i) => (i.checked = !all));
-      } else if (k === "\r" || k === "\n") return done(items.filter((i) => i.checked));
-      else return;
-      render();
+    const onKey = (chunk) => {
+      pending += chunk.toString();
+      let dirty = false;
+
+      // A chunk can carry several keypresses (hold an arrow down), and a
+      // terminal is free to split one escape sequence across two chunks.
+      // Reading byte by byte turned a split arrow into ESC, then "[", then
+      // "A" - which quit the picker and toggled everything on the way out.
+      while (pending) {
+        if (PARTIAL.test(pending)) break;
+        const key = pending.match(KEY)[0];
+        pending = pending.slice(key.length);
+
+        // ESC is deliberately not a quit key: it is the first byte of every
+        // arrow, so a slow terminal would quit instead of moving the cursor.
+        if (key === "\x03" || key === "q" || key === "Q") return done(null);
+        if (key === "\r" || key === "\n") return done(items.filter((i) => i.checked));
+
+        if (key === "\x1b[A" || key === "\x1bOA" || key === "k") cursor = (cursor - 1 + items.length) % items.length;
+        else if (key === "\x1b[B" || key === "\x1bOB" || key === "j") cursor = (cursor + 1) % items.length;
+        else if (key === " ") items[cursor].checked = !items[cursor].checked;
+        else if (key === "a" || key === "A") {
+          const all = items.every((i) => i.checked);
+          items.forEach((i) => (i.checked = !all));
+        } else continue;
+        dirty = true;
+      }
+
+      if (dirty) render();
     };
 
     stdout.write("\x1b[?25l");

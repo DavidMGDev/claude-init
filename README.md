@@ -15,31 +15,44 @@ No dependencies. Two files do the work: [`bin/claude-init.js`](bin/claude-init.j
   Plugins
   > [x] mattpocock-skills  35 skills: grilling, tdd, code-review, domain-modeling, research
     [x] ponytail  /ponytail [lite|full|ultra], /ponytail-review, /ponytail-audit
-    [x] impeccable  /impeccable polish, /impeccable audit, /impeccable critique
+    [ ] impeccable  opt-in - /impeccable polish, /impeccable audit, /impeccable critique
 
   Bundled skills
     [x] arena
     [x] blast-radius
-    [x] windows-context-menu
+    [ ] windows-context-menu  opt-in
 
   Downloaded skills
     [x] no-ai-slop  petergyang, MIT. Strips AI tells from prose, keeps your voice
 
   space toggle   a all/none   q quit
-  enter install 7, then run /setup-matt-pocock-skills in Claude Code
+  enter install 5, then run /setup-matt-pocock-skills in Claude Code
 ```
 
-Everything starts selected. `space` toggles one, `a` toggles all, `q` quits without installing anything.
+`space` toggles one, `a` toggles all, `q` or `ctrl-c` quits without installing anything.
 
-**`enter` is the only key that commits, and you press it once.** It installs the selected entries, then opens Claude Code. Nothing is installed and nothing launches before it.
+**`enter` is the only key that commits, and you press it once.** It installs what is ticked, then opens Claude Code. Nothing is installed and nothing launches before it.
 
-The last line tells you what `enter` will do, and it tracks the selection. Deselect everything that carries a setup and it says so:
+### On by default, and opt-in
+
+| | |
+|---|---|
+| **On** | `mattpocock-skills`, `ponytail`, `no-ai-slop`, `arena`, `blast-radius` |
+| **Opt-in** | `impeccable`, `windows-context-menu` |
+
+Opt-in entries are marked `opt-in` in the list and start unticked, so you can still tell which ones were off by default after toggling a few. Nothing about them is worse; they are just not wanted in every repo. `impeccable` only earns its keep on frontend work, `windows-context-menu` is a reference for a few times a year.
+
+The split is one line, `DEFAULT_OFF`, near the top of [`bin/claude-init.js`](bin/claude-init.js). Anything not named there is on.
+
+### The last line
+
+It tells you what `enter` will do, and it tracks the selection. Deselect everything that carries a setup and it says so:
 
 ```
   enter install 4. No setup will run in Claude Code, it just opens.
 ```
 
-Without a TTY (a pipe, CI) the picker is skipped and everything installs.
+Without a TTY (a pipe, CI) the picker is skipped and the defaults install; opt-in entries are listed as skipped.
 
 ## Setups
 
@@ -183,7 +196,12 @@ skills/
 npm test
 ```
 
-Covers the picker: key handling, the footer tracking the selection, and the in-place redraw staying aligned. It runs against a fake tty, since there is no tty in CI.
+Covers the picker against a fake tty, since there is no tty in CI: key decoding, the footer tracking the selection, and the redraw.
+
+Two of those are regression tests for bugs that shipped:
+
+- **A split escape sequence.** A terminal may deliver an arrow key as `` in one read and `[A` in the next. Decoded byte by byte that is ESC, then `[`, then `A` - and ESC used to quit while `A` toggles everything, so a single arrow press destroyed the picker. Keys are now buffered and decoded whole, and ESC is no longer a quit key precisely because it starts every arrow.
+- **Erase, then draw.** The redraw blanked the list with `[0J` and then wrote the new one, in two separate `write()` calls. That is two screen states, and the terminal is free to paint the empty one, which is what the flashing was. Each frame is now a single write that draws over the old one, clearing each line's tail with `[K` as it goes.
 
 **A different .gitignore set** — edit `GITIGNORE_BLOCK`. Keep the first and last lines as markers; the entry count in the output is derived, so nothing else needs updating.
 

@@ -51,6 +51,12 @@ const PLUGINS = [
   },
 ];
 
+// Ticked in the picker unless named here. Nothing about an opt-in entry is
+// worse, it is just not what I want in every repo by default: impeccable only
+// earns its keep on frontend work, windows-context-menu is a reference I reach
+// for a few times a year.
+const DEFAULT_OFF = new Set(["impeccable", "windows-context-menu"]);
+
 const REMOTE_SKILLS = [
   {
     name: "no-ai-slop",
@@ -100,9 +106,10 @@ const HELP = `
   Picker
     up/down or j/k   move          space   toggle
     a                all / none    enter   install and go
-    q or esc         quit, install nothing
+    q or ctrl-c      quit, install nothing
 
-    Without a TTY (a pipe, CI) the picker is skipped and everything installs.
+    Most entries start ticked. Ones marked opt-in start unticked.
+    Without a TTY (a pipe, CI) the picker is skipped and the defaults install.
 
   Notes
     .gitignore gets a small block of machine-local paths when this folder is
@@ -228,14 +235,14 @@ const localSkills = existsSync(localDir)
         const f = join(localDir, d, "SKILL.md");
         return existsSync(f) && readFileSync(f, "utf8").startsWith("---");
       })
-      .map((name) => ({ kind: "local", group: "Bundled skills", name, label: name, checked: true }))
+      .map((name) => ({ kind: "local", group: "Bundled skills", name, label: name }))
   : [];
 
 const catalogue = [
-  ...PLUGINS.map((p) => ({ ...p, kind: "plugin", group: "Plugins", checked: true })),
+  ...PLUGINS.map((p) => ({ ...p, kind: "plugin", group: "Plugins" })),
   ...localSkills,
-  ...REMOTE_SKILLS.map((s) => ({ ...s, kind: "remote", group: "Downloaded skills", checked: true })),
-];
+  ...REMOTE_SKILLS.map((s) => ({ ...s, kind: "remote", group: "Downloaded skills" })),
+].map((i) => ({ ...i, optIn: DEFAULT_OFF.has(i.label), checked: !DEFAULT_OFF.has(i.label) }));
 
 if (!catalogue.length) die("nothing to install");
 
@@ -250,9 +257,11 @@ if (process.stdin.isTTY && process.stdout.isTTY) {
     process.exit(130);
   }
 } else {
-  chosen = catalogue;
+  chosen = catalogue.filter((i) => i.checked);
   head("What do you want?");
-  ok("no TTY, so installing everything");
+  ok(`no TTY, so installing the ${chosen.length} defaults`);
+  const off = catalogue.filter((i) => !i.checked).map((i) => i.label);
+  if (off.length) ok(`opt-in, skipped: ${off.join(", ")}`);
 }
 
 // ── 4. Install ────────────────────────────────────────────────────────────
