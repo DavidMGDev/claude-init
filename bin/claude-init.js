@@ -23,7 +23,6 @@ import { fileURLToPath } from "node:url";
 import { pick } from "./pick.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const SKILLS_DIR = join(homedir(), ".claude", "skills");
 const NET_TIMEOUT_MS = 15000;
 
 // ── What can be installed ─────────────────────────────────────────────────
@@ -44,6 +43,24 @@ const PLUGINS = [
     about: "/ponytail [lite|full|ultra], /ponytail-review, /ponytail-audit, /ponytail-debt",
   },
   {
+    name: "example-skills@anthropic-agent-skills",
+    marketplace: "anthropics/skills",
+    label: "skill-creator",
+    about: "Anthropic's own. Drafts a skill, then evals it against a no-skill baseline",
+  },
+  {
+    name: "godot-claude-harness@godot-claude-harness",
+    marketplace: "DavidMGDev/godot-claude-harness",
+    label: "godot-claude-harness",
+    about: "Mine. /gd-check, /gd-run, /gd-verify against the real engine",
+  },
+  {
+    name: "godot-claude-skills@godot-claude-skills",
+    marketplace: "alexmeckes/godot-claude-skills",
+    label: "godot-claude-skills",
+    about: "alexmeckes. Live editor control over godot-mcp",
+  },
+  {
     name: "impeccable@impeccable",
     marketplace: "pbakaus/impeccable",
     label: "impeccable",
@@ -53,9 +70,18 @@ const PLUGINS = [
 
 // Ticked in the picker unless named here. Nothing about an opt-in entry is
 // worse, it is just not what I want in every repo by default: impeccable only
-// earns its keep on frontend work, windows-context-menu is a reference I reach
-// for a few times a year.
-const DEFAULT_OFF = new Set(["impeccable", "windows-context-menu"]);
+// earns its keep on frontend work, coursework-notebook only in a course folder,
+// skill-creator is for the rare day I write a skill and it pulls in 11 sibling
+// skills with it, windows-context-menu is a reference I reach for a few times
+// a year.
+const DEFAULT_OFF = new Set([
+  "impeccable",
+  "coursework-notebook",
+  "skill-creator",
+  "godot-claude-harness",
+  "godot-claude-skills",
+  "windows-context-menu",
+]);
 
 const REMOTE_SKILLS = [
   {
@@ -72,14 +98,15 @@ const REMOTE_SKILLS = [
 // docs/agents/ - are shared project knowledge. Ignoring them means every clone
 // silently loses the setup, which defeats the point of writing them down.
 // Commit those.
-const GITIGNORE_BLOCK = [
-  "# --- claude-init ---",
-  ".claude/settings.local.json",
-  ".scratch/",
-  "# --- end claude-init ---",
-];
-const GITIGNORE_MARKER = GITIGNORE_BLOCK[0];
-const GITIGNORE_ENTRIES = GITIGNORE_BLOCK.filter((l) => !l.startsWith("#"));
+//
+// Skills you unticked in the second picker are appended to these at write
+// time. The block is rewritten in full on every run rather than appended to
+// once, which is what lets a skill move back and forth between committed and
+// ignored: the answer lives in the block and nowhere else, so a re-run always
+// shows the repo as it actually stands.
+const GITIGNORE_BASE = [".claude/settings.local.json", ".scratch/"];
+const GITIGNORE_START = "# --- claude-init ---";
+const GITIGNORE_END = "# --- end claude-init ---";
 
 // ── Output ────────────────────────────────────────────────────────────────
 
@@ -100,6 +127,8 @@ const HELP = `
   Options
     -g, --git       git init first if this folder is not a repo yet
     -n, --no-open   install only, do not launch Claude
+        --global    install into ~/.claude instead, and leave this folder
+                    completely untouched
     -h, --help      this
     -v, --version   version
 
@@ -111,9 +140,18 @@ const HELP = `
     Most entries start ticked. Ones marked opt-in start unticked.
     Without a TTY (a pipe, CI) the picker is skipped and the defaults install.
 
+  Where things land
+    By default skills go to .claude/skills/ in this repo and plugins are
+    installed at project scope, so a clone gets both. A second picker then asks
+    which of those skills to commit; everything starts ticked, so enter means
+    "all of them". Unticked ones get a .gitignore entry instead, and if one was
+    already committed it is dropped from the index with git rm --cached - your
+    local copy stays. Re-run any time to change your mind either way.
+
+    --global puts skills in ~/.claude/skills/ and plugins at user scope, writes
+    no .gitignore and creates no .claude/ here. Use it from any folder.
+
   Notes
-    .gitignore gets a small block of machine-local paths when this folder is
-    inside a git repo, or when -g created one. It is written at the repo root.
     Docs the skills produce (CLAUDE.md, AGENTS.md, CONTEXT.md, docs/adr/) are
     deliberately NOT ignored: commit them.
 `;
@@ -121,7 +159,7 @@ const HELP = `
 // ── Args ──────────────────────────────────────────────────────────────────
 
 const argv = process.argv.slice(2);
-const FLAGS = new Set(["-g", "--git", "-n", "--no-open", "-h", "--help", "-v", "--version"]);
+const FLAGS = new Set(["-g", "--git", "-n", "--no-open", "--global", "-h", "--help", "-v", "--version"]);
 const has = (...f) => f.some((x) => argv.includes(x));
 
 if (has("-h", "--help")) {
@@ -144,6 +182,9 @@ if (unknown.length) {
 
 const wantGit = has("-g", "--git");
 const noOpen = has("-n", "--no-open");
+// No short flag on purpose: -G next to -g is a footgun, and the two do very
+// different things.
+let globalMode = has("--global");
 const cwd = process.cwd();
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -216,6 +257,39 @@ function copyDir(from, to) {
   }
 }
 
+// The claude-init block, as a list of entry lines. Absent block -> null, so a
+// first run can be told apart from a run where you unticked everything.
+function readIgnoreBlock(path) {
+  if (!existsSync(path)) return null;
+  const lines = readFileSync(path, "utf8").split(/\r?\n/);
+  const a = lines.indexOf(GITIGNORE_START);
+  const b = lines.indexOf(GITIGNORE_END);
+  if (a === -1 || b === -1 || b < a) return null;
+  return lines.slice(a + 1, b).filter((l) => l.trim() && !l.startsWith("#"));
+}
+
+const skillIgnoreLine = (name) => `.claude/skills/${name}/`;
+
+// Replaces the block in place if there is one, appends it otherwise, so the
+// entries around it keep their position and the file does not grow every run.
+function writeIgnoreBlock(path, entries) {
+  const current = existsSync(path) ? readFileSync(path, "utf8") : "";
+  const eol = current.includes("\r\n") ? "\r\n" : "\n";
+  const block = [GITIGNORE_START, ...entries, GITIGNORE_END];
+  const lines = current === "" ? [] : current.split(/\r?\n/);
+  const a = lines.indexOf(GITIGNORE_START);
+  const b = lines.indexOf(GITIGNORE_END);
+
+  let out;
+  if (a !== -1 && b !== -1 && b >= a) {
+    out = [...lines.slice(0, a), ...block, ...lines.slice(b + 1)];
+  } else {
+    const pad = lines.length && lines[lines.length - 1].trim() !== "" ? [""] : [];
+    out = [...lines, ...pad, ...block, ""];
+  }
+  writeFileSync(path, out.join(eol).replace(/(\r?\n)+$/, eol));
+}
+
 // ── 1. Preflight ──────────────────────────────────────────────────────────
 
 head("claude-init");
@@ -226,7 +300,56 @@ if (!detectClaude()) {
 ok(`Claude Code ${claudeVersion}`);
 ok(`target: ${cwd}`);
 
-// ── 2. Catalogue ──────────────────────────────────────────────────────────
+// ── 2. Repo ───────────────────────────────────────────────────────────────
+
+// existsSync(".git") misses a subdirectory of a repo, a worktree, and a
+// submodule (where .git is a file). Ask git instead.
+function repoRoot() {
+  const inside = git(["rev-parse", "--is-inside-work-tree"]);
+  if (inside.status !== 0 || (inside.stdout || "").trim() !== "true") return null;
+  const top = git(["rev-parse", "--show-toplevel"]);
+  return top.status === 0 ? top.stdout.trim() : null;
+}
+
+let root = null;
+
+// --global writes to the home directory and must leave the folder you happen
+// to be standing in completely untouched, so none of this runs.
+if (!globalMode) {
+  head("Repo");
+  root = repoRoot();
+
+  if (wantGit && !root) {
+    if (git(["init", "-q"]).status === 0) {
+      root = repoRoot();
+      ok("git init");
+    } else {
+      warn("git init failed");
+    }
+  } else if (wantGit && root) {
+    ok("already a git repo");
+  }
+
+  // claude-init's own repo already ships these skills in claude-init/skills.
+  // Installing locally would copy them to .claude/skills and commit a second
+  // copy of the source of truth, so this one repo is always a global install.
+  if (root && !relative(root, ROOT).toLowerCase().startsWith("..")) {
+    globalMode = true;
+    warn("this repo is claude-init's own source, installing globally instead");
+  }
+}
+
+// Skills land beside the code in local mode, so a clone carries them. The repo
+// root, not cwd, because that is where .gitignore and .claude/ belong.
+const skillsDir = globalMode
+  ? join(homedir(), ".claude", "skills")
+  : join(root ?? cwd, ".claude", "skills");
+
+if (globalMode) ok(`global install: ${skillsDir}`);
+else if (root) ok(`repo: ${root}`);
+else ok("not a git repo, so nothing will be gitignored (use -g to create one)");
+
+// ── 3. Catalogue ──────────────────────────────────────────────────────────
 
 const localDir = join(ROOT, "skills");
 const localSkills = existsSync(localDir)
@@ -246,7 +369,7 @@ const catalogue = [
 
 if (!catalogue.length) die("nothing to install");
 
-// ── 3. Pick ───────────────────────────────────────────────────────────────
+// ── 4. Pick ───────────────────────────────────────────────────────────────
 
 let chosen;
 if (process.stdin.isTTY && process.stdout.isTTY) {
@@ -264,7 +387,52 @@ if (process.stdin.isTTY && process.stdout.isTTY) {
   if (off.length) ok(`opt-in, skipped: ${off.join(", ")}`);
 }
 
-// ── 4. Install ────────────────────────────────────────────────────────────
+// ── 5. Commit which of them? ──────────────────────────────────────────────
+
+const skills = chosen.filter((i) => i.kind !== "plugin");
+
+// name -> { commit, wasIgnored }, empty unless the question was worth asking.
+// --global writes to the home directory and outside a repo there is nothing to
+// commit to, so in both cases there is nothing to decide.
+let installedSkills = [];
+
+if (!globalMode && root && skills.length) {
+  const previous = readIgnoreBlock(join(root, ".gitignore"));
+  const wasIgnored = new Set(
+    (previous ?? [])
+      .filter((l) => l.startsWith(".claude/skills/"))
+      .map((l) => l.split("/")[2])
+      .filter(Boolean),
+  );
+
+  // Ticked means committed and everything starts ticked, so enter alone means
+  // "share all of these". Last run's answer overrides that default, which is
+  // the whole point of re-running: it shows you the repo as it stands now.
+  const items = skills.map((x) => ({
+    ...x,
+    group: "Commit these to the repo?",
+    optIn: false,
+    about: wasIgnored.has(x.name) ? "currently gitignored" : "",
+    checked: !wasIgnored.has(x.name),
+  }));
+
+  const footer = (n, all, c) => [[
+    `  enter commit ${n} of ${all.length}, gitignore the rest`,
+    `  ${c(1, "enter")} commit ${n} of ${all.length}, ${c(33, "gitignore the rest")}`,
+  ]];
+
+  if (process.stdin.isTTY && process.stdout.isTTY) {
+    head("Share with the repo?");
+    if ((await pick(items, { footer })) === null) {
+      console.log("\n  nothing installed\n");
+      process.exit(130);
+    }
+  }
+
+  installedSkills = items.map((x) => ({ name: x.name, commit: x.checked, wasIgnored: wasIgnored.has(x.name) }));
+}
+
+// ── 6. Install ────────────────────────────────────────────────────────────
 
 const plugins = chosen.filter((i) => i.kind === "plugin");
 let pluginInstalled = false;
@@ -276,7 +444,9 @@ if (plugins.length) {
     // check first. Only the install result is worth reporting.
     if (p.marketplace) runClaude(["plugin", "marketplace", "add", p.marketplace], { quiet: true });
     // -y is required whenever stdout is not a TTY, which it is not here.
-    const r = runClaude(["plugin", "install", p.name, "-y"], { quiet: true });
+    // project scope records the plugin in the repo's .claude/settings.json, so
+    // a clone gets it. user scope is the machine-wide install --global wants.
+    const r = runClaude(["plugin", "install", p.name, "-y", "--scope", globalMode ? "user" : "project"], { quiet: true });
     if (r.status === 0) {
       ok(`${p.label}  ${c(2, p.about)}`);
       pluginInstalled = true;
@@ -289,14 +459,13 @@ if (plugins.length) {
   }
 }
 
-const skills = chosen.filter((i) => i.kind !== "plugin");
 if (skills.length) {
   head("Skills");
-  mkdirSync(SKILLS_DIR, { recursive: true });
+  mkdirSync(skillsDir, { recursive: true });
 
   for (const s of skills.filter((i) => i.kind === "local")) {
-    const existed = existsSync(join(SKILLS_DIR, s.name));
-    copyDir(join(localDir, s.name), join(SKILLS_DIR, s.name));
+    const existed = existsSync(join(skillsDir, s.name));
+    copyDir(join(localDir, s.name), join(skillsDir, s.name));
     ok(`${s.name} (bundled, ${existed ? "updated" : "installed"})`);
   }
 
@@ -304,9 +473,9 @@ if (skills.length) {
     try {
       const body = await download(s.url);
       if (!body.startsWith("---")) throw new Error("not a SKILL.md");
-      const existed = existsSync(join(SKILLS_DIR, s.name));
-      mkdirSync(join(SKILLS_DIR, s.name), { recursive: true });
-      writeFileSync(join(SKILLS_DIR, s.name, "SKILL.md"), body);
+      const existed = existsSync(join(skillsDir, s.name));
+      mkdirSync(join(skillsDir, s.name), { recursive: true });
+      writeFileSync(join(skillsDir, s.name, "SKILL.md"), body);
       ok(`${s.label} (${existed ? "updated" : "installed"})  ${c(2, s.about)}`);
     } catch (e) {
       warn(`skipped ${s.name}: ${e.message}`);
@@ -314,48 +483,37 @@ if (skills.length) {
   }
 }
 
-// ── 5. git ────────────────────────────────────────────────────────────────
+// ── 7. gitignore and untracking ───────────────────────────────────────────
 
-head("Repo");
-
-// existsSync(".git") misses a subdirectory of a repo, a worktree, and a
-// submodule (where .git is a file). Ask git instead.
-function repoRoot() {
-  const inside = git(["rev-parse", "--is-inside-work-tree"]);
-  if (inside.status !== 0 || (inside.stdout || "").trim() !== "true") return null;
-  const top = git(["rev-parse", "--show-toplevel"]);
-  return top.status === 0 ? top.stdout.trim() : null;
-}
-
-let root = repoRoot();
-
-if (wantGit && !root) {
-  if (git(["init", "-q"]).status === 0) {
-    root = repoRoot();
-    ok("git init");
-  } else {
-    warn("git init failed");
-  }
-} else if (wantGit && root) {
-  ok("already a git repo");
-}
-
-if (root) {
+if (!globalMode && root) {
+  head("Repo");
   const path = join(root, ".gitignore");
-  const current = existsSync(path) ? readFileSync(path, "utf8") : "";
-  if (current.includes(GITIGNORE_MARKER)) {
-    ok(".gitignore already set");
-  } else {
-    // Match the file's own line endings instead of forcing LF into a CRLF file.
-    const eol = current.includes("\r\n") ? "\r\n" : "\n";
-    const pad = current === "" ? "" : (current.endsWith("\n") ? "" : eol) + eol;
-    writeFileSync(path, current + pad + GITIGNORE_BLOCK.join(eol) + eol);
-    const where = relative(cwd, path) || ".gitignore";
-    ok(`.gitignore +${GITIGNORE_ENTRIES.length} entries (${where})`);
+  const ignored = installedSkills.filter((x) => !x.commit);
+
+  writeIgnoreBlock(path, [...GITIGNORE_BASE, ...ignored.map((x) => skillIgnoreLine(x.name))]);
+  const where = relative(cwd, path) || ".gitignore";
+  ok(`.gitignore ${GITIGNORE_BASE.length + ignored.length} entries (${where})`);
+
+  // Adding the ignore line does nothing on its own: git keeps honouring the
+  // index for a file it is already tracking. Dropping it from the index is the
+  // step that actually takes it out of the repo.
+  for (const x of ignored) {
+    const rel = `.claude/skills/${x.name}`;
+    const tracked = git(["-C", root, "ls-files", "--", rel]);
+    if (tracked.status === 0 && (tracked.stdout || "").trim()) {
+      const rm = git(["-C", root, "rm", "-r", "--cached", "-q", "--", rel]);
+      if (rm.status === 0) ok(`${x.name} untracked (staged; your local copy is untouched)`);
+      else warn(`${x.name}: git rm --cached failed, run it by hand`);
+    }
   }
+
+  const restored = installedSkills.filter((x) => x.commit && x.wasIgnored);
+  if (restored.length) ok(`${restored.map((x) => x.name).join(", ")} no longer ignored - git add to commit`);
+
   ok("CLAUDE.md, AGENTS.md, CONTEXT.md and docs/ stay tracked - commit them");
-} else {
-  ok("not a git repo, so no .gitignore written (use -g to create one)");
+} else if (globalMode) {
+  head("Repo");
+  ok("--global, so this folder was not touched at all");
 }
 
 // ── 6. Hand over ──────────────────────────────────────────────────────────

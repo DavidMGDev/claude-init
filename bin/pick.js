@@ -13,7 +13,21 @@ const KEY = /^(?:\x1b\[[0-9;]*[A-Za-z~]|\x1bO[A-Za-z]|[\s\S])/;
 // The same sequences while still arriving, with the final byte missing.
 const PARTIAL = /^\x1b(?:\[[0-9;]*|O)?$/;
 
-export function pick(items, { stdin = process.stdin, stdout = process.stdout, color = true } = {}) {
+// The default footer, kept out of pick() so a second pass can ask a different
+// question over the same list without inheriting "install N".
+function installFooter(n, items, c) {
+  const setups = items.filter((i) => i.checked && i.setup).map((i) => i.setup);
+  if (setups.length) {
+    const s = setups.join(" and ");
+    return [[`  enter install ${n}, then run ${s} in Claude Code`, `  ${c(1, "enter")} install ${n}, then run ${c(36, s)} in Claude Code`]];
+  }
+  return [[
+    `  enter install ${n}. No setup will run in Claude Code, it just opens.`,
+    `  ${c(1, "enter")} install ${n}. ${c(33, "No setup will run in Claude Code")}, it just opens.`,
+  ]];
+}
+
+export function pick(items, { stdin = process.stdin, stdout = process.stdout, color = true, footer } = {}) {
   const c = (n, s) => (color ? `\x1b[${n}m${s}\x1b[0m` : s);
 
   return new Promise((resolve) => {
@@ -50,16 +64,9 @@ export function pick(items, { stdin = process.stdin, stdout = process.stdout, co
         row("");
       }
 
-      const setups = items.filter((i) => i.checked && i.setup).map((i) => i.setup);
       const n = items.filter((i) => i.checked).length;
       row("  space toggle   a all/none   q quit", c(2, "  space toggle   a all/none   q quit"));
-      if (setups.length) {
-        const s = setups.join(" and ");
-        row(`  enter install ${n}, then run ${s} in Claude Code`, `  ${c(1, "enter")} install ${n}, then run ${c(36, s)} in Claude Code`);
-      } else {
-        row(`  enter install ${n}. No setup will run in Claude Code, it just opens.`,
-            `  ${c(1, "enter")} install ${n}. ${c(33, "No setup will run in Claude Code")}, it just opens.`);
-      }
+      for (const [plain, colored] of footer ? footer(n, items, c) : installFooter(n, items, c)) row(plain, colored);
       return out;
     };
 

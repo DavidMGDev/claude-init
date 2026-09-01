@@ -213,4 +213,20 @@ for (const key of ["q", "Q", "\x03"]) {
   assert.match(out, /\[ \] ponytail {2}opt-in - \/ponytail/);
 }
 
+// A caller-supplied footer replaces the install one entirely, which is what
+// lets the second pass ask "commit these?" over the same list instead of
+// inheriting a count of things to install.
+{
+  const io = fakeTty();
+  const items = catalogue();
+  const footer = (n, all, c) => [[`  enter commit ${n} of ${all.length}, gitignore the rest`]];
+  const done = pick(items, { ...io, footer });
+  io.stdin.emit("data", Buffer.from(" "));
+  io.stdin.emit("data", Buffer.from("\r"));
+  await done;
+  const out = io.stdout.written.join("");
+  assert.match(out, /enter commit 2 of 3, gitignore the rest/);
+  assert.doesNotMatch(out, /install/);
+}
+
 console.log("pick: all assertions passed");
