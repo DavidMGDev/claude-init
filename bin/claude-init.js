@@ -70,13 +70,13 @@ const PLUGINS = [
 
 // Ticked in the picker unless named here. Nothing about an opt-in entry is
 // worse, it is just not what I want in every repo by default: impeccable only
-// earns its keep on frontend work, coursework-notebook only in a course folder,
+// earns its keep on frontend work, unslop-data-notebook only in a course folder,
 // skill-creator is for the rare day I write a skill and it pulls in 11 sibling
 // skills with it, windows-context-menu is a reference I reach for a few times
 // a year.
 const DEFAULT_OFF = new Set([
   "impeccable",
-  "coursework-notebook",
+  "unslop-data-notebook",
   "skill-creator",
   "godot-claude-harness",
   "godot-claude-skills",

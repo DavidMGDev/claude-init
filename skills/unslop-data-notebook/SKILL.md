@@ -1,10 +1,10 @@
 ---
-name: coursework-notebook
+name: unslop-data-notebook
 description: "Write or revise the prose in a data-analysis notebook so it reads as the student's own coursework: their voice, and nothing above the line the course has actually crossed. Always asks first which classes and labs have been covered. Use when writing or trimming markdown cells and code comments in a lab or project notebook, when a section sounds too polished or too advanced to be defensible, or when preparing a group deliverable in Colab."
 argument-hint: "Which notebook, and which part is yours"
 ---
 
-# Coursework notebook
+# Unslop data notebook
 
 A notebook that gets graded is not judged only on being right. It is judged on
 being **plausibly yours**. A correct paragraph that quotes a concept the course
