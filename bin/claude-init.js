@@ -73,10 +73,11 @@ const PLUGINS = [
 // earns its keep on frontend work, unslop-data-notebook only in a course folder,
 // skill-creator is for the rare day I write a skill and it pulls in 11 sibling
 // skills with it, windows-context-menu is a reference I reach for a few times
-// a year.
+// a year, indie-game-doctor only in a game repo.
 const DEFAULT_OFF = new Set([
   "impeccable",
   "unslop-data-notebook",
+  "indie-game-doctor",
   "skill-creator",
   "godot-claude-harness",
   "godot-claude-skills",

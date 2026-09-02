@@ -24,6 +24,7 @@ No dependencies. Two files do the work: [`bin/claude-init.js`](bin/claude-init.j
     [x] arena
     [x] blast-radius
     [x] handoff-clip
+    [ ] indie-game-doctor  opt-in
     [ ] unslop-data-notebook  opt-in
     [ ] windows-context-menu  opt-in
 
@@ -43,9 +44,9 @@ No dependencies. Two files do the work: [`bin/claude-init.js`](bin/claude-init.j
 | | |
 |---|---|
 | **On** | `mattpocock-skills`, `ponytail`, `no-ai-slop`, `arena`, `blast-radius` |
-| **Opt-in** | `impeccable`, `unslop-data-notebook`, `skill-creator`, `godot-claude-harness`, `godot-claude-skills`, `windows-context-menu` |
+| **Opt-in** | `impeccable`, `unslop-data-notebook`, `indie-game-doctor`, `skill-creator`, `godot-claude-harness`, `godot-claude-skills`, `windows-context-menu` |
 
-Opt-in entries are marked `opt-in` in the list and start unticked, so you can still tell which ones were off by default after toggling a few. Nothing about them is worse; they are just not wanted in every repo. `impeccable` only earns its keep on frontend work, `unslop-data-notebook` only in a course folder, `skill-creator` is for the rare day you write a skill and it pulls in 11 sibling skills with it, `windows-context-menu` is a reference for a few times a year.
+Opt-in entries are marked `opt-in` in the list and start unticked, so you can still tell which ones were off by default after toggling a few. Nothing about them is worse; they are just not wanted in every repo. `impeccable` only earns its keep on frontend work, `unslop-data-notebook` only in a course folder, `skill-creator` is for the rare day you write a skill and it pulls in 11 sibling skills with it, `windows-context-menu` is a reference for a few times a year, and `indie-game-doctor` only belongs in a game repo.
 
 The split is one line, `DEFAULT_OFF`, near the top of [`bin/claude-init.js`](bin/claude-init.js). Anything not named there is on.
 
@@ -124,6 +125,7 @@ Skills with no maintained upstream, so they ship here.
 | [`arena`](skills/arena/SKILL.md) | Spawns N candidates at one task, cross-judges, picks a base, grafts the best of the losers into it |
 | [`blast-radius`](skills/blast-radius/SKILL.md) | Finds what a change breaks beyond the diff, and **proves** the one safety fact by running real code instead of writing it up |
 | [`handoff-clip`](skills/handoff-clip/SKILL.md) | Compacts the conversation into a handoff document and prints it as one copyable block, writing no files |
+| [`indie-game-doctor`](skills/indie-game-doctor/SKILL.md) | Diagnoses an indie game across concept, prototype, production and launch, gating the whole consultation on whether a stranger has played it, and citing the video behind every conclusion |
 | [`unslop-data-notebook`](skills/unslop-data-notebook/SKILL.md) | Writes the prose in a data-analysis notebook in your own voice, and asks first which classes you have had so nothing lands above what the course taught |
 | [`windows-context-menu`](skills/windows-context-menu/SKILL.md) | Adds, places and de-duplicates Explorer right-click entries through the registry |
 
