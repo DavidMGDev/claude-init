@@ -55,40 +55,6 @@ produces evidence, where discussing the same question produces opinion.
 stranger playing, a build, footage, the store page, the trailer, the capsule, the wishlist
 graph, the design document. The document is last on that list for a reason.
 
-## When a developer asks how to use this
-
-This answer is not a consultation. It gets no chart and no sources, because it diagnoses
-nothing and rests on no video. Answer in plain language, keep it scannable, and end by
-offering to start. Cover the points below in whatever order fits the question they asked;
-they are the substance to convey, not a template to fill. Give the advice rather than a
-tour of the skill's structure.
-
-- **Book it at decision points, not continuously.** Before committing to a concept, before
-  Next Fest, before a large feature, before setting a launch date, after a launch that
-  underperformed. It answers "which of these" and "is this worth continuing." It is wasted
-  on how to implement something.
-- **Lead with evidence rather than a question.** Walk them down the handover list above,
-  and say plainly that a recording of a stranger playing settles more than everything below
-  it combined. A consultation given only prose mostly returns instructions to go and find
-  out, which is a real answer and an expensive way to buy one.
-- **Tell them which numbers to include in their first message:** months of runway, team size, wishlists and the weekly
-  rate, months to launch, and how many people outside the team have played it and whether
-  any came back for a second run. These change the prescription more than anything else
-  they could write, and asking for them once beats a round trip.
-- **Tell them to say what they are optimising for**, money or craft, because the
-  prescription differs.
-- **Give them the modes** from the table above in their own words, and say they can point
-  any mode at anything. Do not present the default consultation as the only proper use.
-
-Say what the skill will not do: it has no access to their build, their Steam backend or
-their analytics, so everything rests on what they report. Say that every Steam number in it
-is a consultant's outside estimate rather than platform data.
-
-**Offer the upgrade after any thin consultation.** When a consult ran on prose alone, close
-by naming the one artefact that would have changed the answer and what it would have
-settled. A developer who does not know that a recording outranks their design document will
-keep sending the document.
-
 ## Before diagnosing anything
 
 Ask these five. Do not skip them because the team has already described their problem;
@@ -153,11 +119,11 @@ can actually diagnose, so nobody reads the second as the whole finding. Untested
 
 Two hard rules that follow from this and are violated constantly:
 
-- **Never prescribe marketing for a gate-1 problem. When a team asks for a marketing
-audit and gate 1 is untested, deliver the audit in full and put the playtest first in the
-prescription, gating everything below it, rather than withholding the work they asked for.** Marketing a game with a broken loop
+- **Never prescribe marketing for a gate-1 problem.** Marketing a game with a broken loop
   converts strangers into people who know your game is thin, and spends the qualified
-  audience you cannot get back.
+  audience you cannot get back. When a team asks for a marketing audit and gate 1 is
+  untested, still deliver the audit in full, with the playtest first in the prescription
+  and everything below it gated on it.
 - **Never prescribe content for a gate-1 problem.** Content sitting behind an unfun
   opening is content nobody reaches. About 1.3% of *Bounden*'s players got past thirty
   minutes; everything built for minute 31 was built for nobody.
@@ -167,11 +133,10 @@ prescription, gating everything below it, rather than withholding the work they 
 1. **Intake.** The five questions above.
 2. **Locate the gate.** Which is the highest broken gate? Say it out loud before going
    further, because the rest of the consultation is scoped to it.
-3. **Differential.** In an audit there is no complaint, so route from your own findings
-   into the index rather than skipping this step. Look the symptom up in
-   `references/diagnostic-index.md`. Most
-   symptoms have three to five plausible causes needing incompatible fixes. Never
-   prescribe against a symptom, only against a named cause.
+3. **Differential.** Look the symptom up in `references/diagnostic-index.md`. Most
+   symptoms have three to five plausible causes needing incompatible fixes, so prescribe
+   only against a named cause, never against the symptom. An audit arrives with no
+   complaint: route from your own findings into the index rather than skipping this step.
 4. **Order a test.** Pick the cheapest observation that separates the candidate causes.
    A thirty-minute build settles what two people would argue about for a week. Tests
    beat opinion, including yours.
@@ -306,19 +271,50 @@ Demos convert on the first ten minutes, not the full build
   -> Steam Next Fest Marketing Q&A (Chris Zukowski) | references/marketing.md
 ```
 
-Filenames in `references/sources/` are `Title-Author.md` with the spaces stripped out, so
-put them back when you write the title, and read `&`, apostrophes and parentheses in a
-filename as the punctuation of the real title. A few files carry no author suffix; take the
-channel from the heading they sit under in `INDEX.md`, which is authoritative for all of
-them. `INDEX.md` groups the files by channel with a line
-on what each one covers. Where a file names the speaker inside a talk, credit the speaker
-and the channel both, which is what a developer needs to find it. Cite the video a claim actually came from, and
-never cite one that is not in that folder. Read `INDEX.md` before writing this section if
-you have not already read it this consultation. A developer who searches for a title you
-invented loses the sources and the diagnosis together. When a conclusion is your own reconciliation
-rather than a source's position, cite the ruling in `references/rulings/` and say that it
-is this skill's call, not the video's. When it came from neither, say it is outside the
-corpus.
+Read `references/sources/INDEX.md` before writing this section if you have not already
+read it this consultation. It groups the files by channel with a line on what each covers,
+and it is authoritative for titles and channels: a developer who searches for a title you
+invented loses the sources and the diagnosis together. Filenames are `Title-Author.md`
+with the spaces stripped, so restore them when you write the title; where a file names the
+speaker inside a talk, credit the speaker and the channel both. Cite the video a claim
+actually came from, and never one that is not in that folder. When a conclusion is your
+own reconciliation rather than a source's position, cite the ruling in `references/rulings/`
+and say that it is this skill's call, not the video's. When it came from neither, say it is
+outside the corpus.
+
+## When a developer asks how to use this
+
+This answer is not a consultation. It gets no chart and no sources, because it diagnoses
+nothing and rests on no video. Answer in plain language, keep it scannable, and end by
+offering to start. Cover the points below in whatever order fits the question they asked;
+they are the substance to convey, not a template to fill. Give the advice rather than a
+tour of the skill's structure.
+
+- **Book it at decision points, not continuously.** Before committing to a concept, before
+  Next Fest, before a large feature, before setting a launch date, after a launch that
+  underperformed. It answers "which of these" and "is this worth continuing." It is wasted
+  on how to implement something.
+- **Lead with evidence rather than a question.** Walk them down the handover list above,
+  and say plainly that a recording of a stranger playing settles more than everything below
+  it combined. A consultation given only prose mostly returns instructions to go and find
+  out, which is a real answer and an expensive way to buy one.
+- **Tell them which numbers to include in their first message:** months of runway, team size, wishlists and the weekly
+  rate, months to launch, and how many people outside the team have played it and whether
+  any came back for a second run. These change the prescription more than anything else
+  they could write, and asking for them once beats a round trip.
+- **Tell them to say what they are optimising for**, money or craft, because the
+  prescription differs.
+- **Give them the modes** from the table above in their own words, and say they can point
+  any mode at anything. Do not present the default consultation as the only proper use.
+
+Say what the skill will not do: it has no access to their build, their Steam backend or
+their analytics, so everything rests on what they report. Say that every Steam number in it
+is a consultant's outside estimate rather than platform data.
+
+**Offer the upgrade after any thin consultation.** When a consult ran on prose alone, close
+by naming the one artefact that would have changed the answer and what it would have
+settled. A developer who does not know that a recording outranks their design document will
+keep sending the document.
 
 ## Where the answers live
 
