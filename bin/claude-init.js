@@ -73,13 +73,14 @@ const PLUGINS = [
 ];
 
 // Ticked in the picker unless named here. Nothing about an opt-in entry is
-// worse, it is just not what I want everywhere by default: impeccable only
-// earns its keep on frontend work, deslop-jupyter only for coursework,
-// skill-creator is for the rare day I write a skill and it pulls in 11 sibling
+// worse, it is just not what I want everywhere by default: impeccable and
+// design-taste-frontend only earn their keep on frontend work, deslop-jupyter
+// only for coursework, skill-creator is for the rare day I write a skill and it pulls in 11 sibling
 // skills with it, windows-context-menu is a reference I reach for a few times
 // a year, indie-game-doctor only for game work.
 const DEFAULT_OFF = new Set([
   "impeccable",
+  "design-taste-frontend",
   "deslop-jupyter",
   "indie-game-doctor",
   "skill-creator",
@@ -94,6 +95,12 @@ const REMOTE_SKILLS = [
     url: "https://raw.githubusercontent.com/petergyang/no-ai-slop/main/skills/no-ai-slop/SKILL.md",
     label: "no-ai-slop",
     about: "petergyang, MIT. Strips AI tells from prose, keeps your voice",
+  },
+  {
+    name: "design-taste-frontend",
+    url: "https://raw.githubusercontent.com/Leonxlnx/taste-skill/main/skills/taste-skill/SKILL.md",
+    label: "design-taste-frontend",
+    about: "Leonxlnx taste-skill, MIT. Anti-slop layout, type and motion for landing pages",
   },
 ];
 

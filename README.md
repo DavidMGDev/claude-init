@@ -51,9 +51,9 @@ Per-repo entries are never left out, since each repo needs its own install and s
 | | |
 |---|---|
 | **On** | `mattpocock-skills`, `ponytail`, `no-ai-slop`, `arena`, `blast-radius`, `handoff-clip`, `cloudflare-upload`, `make-ci-skill`, `presentable`, `readable` |
-| **Opt-in** | `impeccable`, `deslop-jupyter`, `indie-game-doctor`, `skill-creator`, `godot-claude-harness`, `godot-claude-skills`, `windows-context-menu` |
+| **Opt-in** | `impeccable`, `design-taste-frontend`, `deslop-jupyter`, `indie-game-doctor`, `skill-creator`, `godot-claude-harness`, `godot-claude-skills`, `windows-context-menu` |
 
-Opt-in entries are marked `opt-in` and start unticked, so you can still tell which ones were off by default after toggling a few. Nothing about them is worse; they just aren't wanted everywhere. `impeccable` only earns its keep on frontend work, `deslop-jupyter` only for coursework, `skill-creator` is for the rare day you write a skill and it pulls in 11 sibling skills with it, `windows-context-menu` is a reference for a few times a year, and `indie-game-doctor` is only for game work.
+Opt-in entries are marked `opt-in` and start unticked, so you can still tell which ones were off by default after toggling a few. Nothing about them is worse; they just aren't wanted everywhere. `impeccable` and `design-taste-frontend` only earn their keep on frontend work, `deslop-jupyter` only for coursework, `skill-creator` is for the rare day you write a skill and it pulls in 11 sibling skills with it, `windows-context-menu` is a reference for a few times a year, and `indie-game-doctor` is only for game work.
 
 The split is one line, `DEFAULT_OFF`, near the top of [`bin/claude-init.js`](bin/claude-init.js). Anything not named there is on.
 
@@ -147,13 +147,14 @@ My own skills, and ones with no maintained upstream. **This folder is the source
 
 `arena` and `blast-radius` are adapted from pstack (MIT), with its dead `~/.cursor/rules` and "principle skill" references stripped out.
 
-### Downloaded skill
+### Downloaded skills
 
 | Skill | Source |
 |---|---|
+| `design-taste-frontend` | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) (MIT), pushes layout, typography and motion on landing pages away from the generic AI look |
 | `no-ai-slop` | [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) (MIT) — strips AI tells from prose while preserving the writer's voice |
 
-Fetched on every run to check it against the global copy, so an upstream change shows up as `update`.
+Fetched on every run to check them against the global copy, so an upstream change shows up as `update`.
 
 ## Options
 
