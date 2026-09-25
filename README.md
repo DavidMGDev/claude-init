@@ -50,7 +50,7 @@ Per-repo entries are never left out, since each repo needs its own install and s
 
 | | |
 |---|---|
-| **On** | `mattpocock-skills`, `ponytail`, `no-ai-slop`, `arena`, `blast-radius`, `handoff-clip`, `cloudflare-upload`, `make-ci-skill` |
+| **On** | `mattpocock-skills`, `ponytail`, `no-ai-slop`, `arena`, `blast-radius`, `handoff-clip`, `cloudflare-upload`, `make-ci-skill`, `presentable`, `readable` |
 | **Opt-in** | `impeccable`, `deslop-jupyter`, `indie-game-doctor`, `skill-creator`, `godot-claude-harness`, `godot-claude-skills`, `windows-context-menu` |
 
 Opt-in entries are marked `opt-in` and start unticked, so you can still tell which ones were off by default after toggling a few. Nothing about them is worse; they just aren't wanted everywhere. `impeccable` only earns its keep on frontend work, `deslop-jupyter` only for coursework, `skill-creator` is for the rare day you write a skill and it pulls in 11 sibling skills with it, `windows-context-menu` is a reference for a few times a year, and `indie-game-doctor` is only for game work.
@@ -141,6 +141,8 @@ My own skills, and ones with no maintained upstream. **This folder is the source
 | [`handoff-clip`](skills/handoff-clip/SKILL.md) | Compacts the conversation into a handoff document and prints it as one copyable block, writing no files |
 | [`indie-game-doctor`](skills/indie-game-doctor/SKILL.md) | Diagnoses an indie game across concept, prototype, production and launch, gating the whole consultation on whether a stranger has played it, and citing the video behind every conclusion |
 | [`make-ci-skill`](skills/make-ci-skill/SKILL.md) | Writes a new skill into this repo, or edits one here, scrubs it for anything personal, installs it globally, and commits and pushes, all in one pass |
+| [`presentable`](skills/presentable/SKILL.md) | Turns a project's material into a slide deck from your HTMLP templates, asking who presents and for how long, or builds a new deck template from a brand and adds it to that repo |
+| [`readable`](skills/readable/SKILL.md) | Turns a project's material into a reading site from your HTMLR templates, deciding first whether it's read to understand or to study, or builds a new reader template from a brand and adds it to that repo |
 | [`windows-context-menu`](skills/windows-context-menu/SKILL.md) | Adds, places and de-duplicates Explorer right-click entries through the registry |
 
 `arena` and `blast-radius` are adapted from pstack (MIT), with its dead `~/.cursor/rules` and "principle skill" references stripped out.
