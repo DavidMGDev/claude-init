@@ -45,7 +45,7 @@ Inside any template:
 4. **Theme.** Default `"theme": "system"`: light and dark through surface tokens, only token values change per scheme, `<meta name="color-scheme" content="light dark">`, no toggle. Declare `light` or `dark` only when the identity can't survive the swap, and say why in one sentence in DESIGN.md.
 5. **Restyle the engine to match.** Tokens and fonts in `reader.css`, the glyph sprite in `index.html`, glyph mapping in `content.js`. Vendor the fonts (latin and latin-ext subsets) with their licences. Keep every visible string in `UI`.
 6. **Update `check.mjs` to the new design**: palette hexes, font families, radii and any rule DESIGN.md adds. Restate every enforced rule in DESIGN.md section 7, so an agent can satisfy them without running it.
-7. **Sample content.** About three lorem chapters holding one exemplar of every block the template styles. `content/index.md` uses `mode: study` and also carries a `summary`, so both modes have something to show. Placeholders only: Lorem ipsum, `00` for numbers, `[Source, Year]` for citations.
+7. **Sample content.** About three lorem chapters holding one exemplar of every block the template styles. `content/index.md` uses `mode: study` and also carries a `summary`, so both modes have something to show. Placeholders only: Lorem ipsum, `00` for numbers, `[Source, Year]` for citations. Keep the sample chapters to the lengths in the skill's "Keep it short" section, and write the same limits into `CONTENT.md`, so a filler who reads only the template still writes short.
 8. **Topic gate.** Nothing from the project that inspired the look may appear. The brand name in the slug, name and `origin` is fine; its products, clients and subject matter are not.
 
    ```sh

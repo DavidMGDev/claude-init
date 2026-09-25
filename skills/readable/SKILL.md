@@ -69,7 +69,7 @@ The template's `README.md` "For AI agents" block and its `CONTENT.md` are the co
 
 On top of the contract:
 
-1. Read all the source material before outlining: the main document, research notes, anything the book draws on. Plan chapters in the order a reader needs the ideas. Five to ten is typical.
+1. Read all the source material before outlining: the main document, research notes, anything the book draws on. Plan chapters in the order a reader needs the ideas. Three to five is typical, and each one has to earn its place (see "Keep it short").
 2. Delete the lorem chapters, and `content/media/figure.svg` unless you use it.
 3. Rename the callout signals to fit the book, in `UI.guide.callouts` and `UI.calloutNames` where the template has them. A plan might use Context, In practice, Key idea, Watch out and Deal-breaker. Keep each type's meaning the same across the whole book.
 4. Put real sources in each chapter's `sources`: file paths or URLs the chapter rests on.
@@ -78,6 +78,25 @@ On top of the contract:
 
 When the source changes later, update every language folder with it, so no version drifts.
 
+### Keep it short
+
+A reader is for taking in the point fast, section by section and item by item. It is not the source document retold. The first draft always comes out too long: one book came out at 8 pages and about 3,000 words, and the version the user liked said the same in 4 pages and about 700 words. In `understand` mode, write to that second shape. These limits are tighter than the template's `CONTENT.md`, and the tighter one wins.
+
+- **The whole book:** readable in about three minutes, so under about 1,000 words. The home page is the title, a subtitle, 3 or 4 summary points and at most one line of body.
+- **A chapter:** under about 250 words. One lead line of 25 words or fewer, then two to four `##` sections.
+- **A section:** one point, carried by a table, a short list or a callout. When a section needs prose, keep it to two sentences.
+- **An item:** one row or bullet per thing that changed, has to be done or went wrong. Give the one number that matters, not every number the source has.
+
+Cut these, even when they are true:
+
+- how the work was done, step by step, when the reader only needs the result
+- background the reader already knows
+- a point already made in another chapter
+- a chapter nobody asked for, such as "next steps" or a future stage
+- hedges, transitions and recaps
+
+`study` mode needs coverage, so the book can be longer there. Its blocks stay just as short.
+
 ### Verify
 
 ```sh
@@ -85,6 +104,8 @@ cd reader && pnpm install && pnpm build && pnpm check
 ```
 
 `pnpm check` audits every view at three widths, in light and dark when the theme is `system`. Fix each violation in the content: shorten, split a chapter, or pick another block. Never edit the check to make it pass.
+
+Then count the words with `wc -w reader/content/*.md` and check the totals against "Keep it short". Reread each chapter and ask of every sentence whether the reader would miss it. If not, cut it.
 
 Then look at it. `pnpm shots` writes screenshots to `shots/`. Read the home and one chapter at phone and desktop width, and check the hero summary says what the book concludes.
 
