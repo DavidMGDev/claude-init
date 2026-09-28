@@ -50,7 +50,7 @@ Per-repo entries are never left out, since each repo needs its own install and s
 
 | | |
 |---|---|
-| **On** | `mattpocock-skills`, `ponytail`, `perception-first-design`, `no-ai-slop`, `arena`, `blast-radius`, `handoff-clip`, `cloudflare-upload`, `make-ci-skill`, `perception-first`, `presentable`, `readable` |
+| **On** | `mattpocock-skills`, `ponytail`, `perception-first-design`, `no-ai-slop`, `arena`, `blast-radius`, `handoff-clip`, `cloudflare-upload`, `make-ci-skill`, `perception-first`, `presentable`, `readable`, `spanish-unslop` |
 | **Opt-in** | `impeccable`, `design-taste-frontend`, `deslop-jupyter`, `indie-game-doctor`, `skill-creator`, `godot-claude-harness`, `godot-claude-skills`, `windows-context-menu` |
 
 Opt-in entries are marked `opt-in` and start unticked, so you can still tell which ones were off by default after toggling a few. Nothing about them is worse; they just aren't wanted everywhere. `impeccable` and `design-taste-frontend` only earn their keep on frontend work, `deslop-jupyter` only for coursework, `skill-creator` is for the rare day you write a skill and it pulls in 11 sibling skills with it, `windows-context-menu` is a reference for a few times a year, and `indie-game-doctor` is only for game work.
@@ -145,6 +145,7 @@ My own skills, and ones with no maintained upstream. **This folder is the source
 | [`perception-first`](skills/perception-first/SKILL.md) | Runs the Perception-First Design plugin on a page, template, deck or copy, applies the fixes bottom-up, and turns every measurable requirement into a gate in the project's check script |
 | [`presentable`](skills/presentable/SKILL.md) | Turns a project's material into a slide deck from your HTMLP templates, asking who presents and for how long, or builds a new deck template from a brand and adds it to that repo |
 | [`readable`](skills/readable/SKILL.md) | Turns a project's material into a reading site from your HTMLR templates, deciding first whether it's read to understand or to study, or builds a new reader template from a brand and adds it to that repo |
+| [`spanish-unslop`](skills/spanish-unslop/SKILL.md) | Writes or edits Spanish copy in plain Costa Rican Spanish with ustedeo, built from line-by-line corrections to AI drafts, or flags the slop without rewriting |
 | [`windows-context-menu`](skills/windows-context-menu/SKILL.md) | Adds, places and de-duplicates Explorer right-click entries through the registry |
 
 `arena` and `blast-radius` are adapted from pstack (MIT), with its dead `~/.cursor/rules` and "principle skill" references stripped out.
