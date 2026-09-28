@@ -63,6 +63,12 @@ const PLUGINS = [
     about: "alexmeckes. Live editor control over godot-mcp",
   },
   {
+    name: "perception-first-design@perception-first-design",
+    marketplace: "skovalik/perception-first-design",
+    label: "perception-first-design",
+    about: "Stefan Kovalik. /perception-first-design:evaluate, :solve, :analyze, :all",
+  },
+  {
     name: "impeccable@impeccable",
     marketplace: "pbakaus/impeccable",
     label: "impeccable",

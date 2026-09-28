@@ -50,7 +50,7 @@ Per-repo entries are never left out, since each repo needs its own install and s
 
 | | |
 |---|---|
-| **On** | `mattpocock-skills`, `ponytail`, `no-ai-slop`, `arena`, `blast-radius`, `handoff-clip`, `cloudflare-upload`, `make-ci-skill`, `presentable`, `readable` |
+| **On** | `mattpocock-skills`, `ponytail`, `perception-first-design`, `no-ai-slop`, `arena`, `blast-radius`, `handoff-clip`, `cloudflare-upload`, `make-ci-skill`, `perception-first`, `presentable`, `readable` |
 | **Opt-in** | `impeccable`, `design-taste-frontend`, `deslop-jupyter`, `indie-game-doctor`, `skill-creator`, `godot-claude-harness`, `godot-claude-skills`, `windows-context-menu` |
 
 Opt-in entries are marked `opt-in` and start unticked, so you can still tell which ones were off by default after toggling a few. Nothing about them is worse; they just aren't wanted everywhere. `impeccable` and `design-taste-frontend` only earn their keep on frontend work, `deslop-jupyter` only for coursework, `skill-creator` is for the rare day you write a skill and it pulls in 11 sibling skills with it, `windows-context-menu` is a reference for a few times a year, and `indie-game-doctor` is only for game work.
@@ -104,12 +104,13 @@ Marketplace plugins, so they update themselves. A marketplace Claude Code does n
 |---|---|---|---|
 | `mattpocock-skills` | official | 35 skills, see below | `/setup-matt-pocock-skills` |
 | [`impeccable`](https://github.com/pbakaus/impeccable) | `pbakaus/impeccable` | `/impeccable polish`, `/impeccable audit`, `/impeccable critique` | `/impeccable init` |
+| [`perception-first-design`](https://github.com/skovalik/perception-first-design) | `skovalik/perception-first-design` | `/perception-first-design:evaluate`, `:solve`, `:analyze`, `:all` | none |
 | [`ponytail`](https://github.com/DietrichGebert/ponytail) | `DietrichGebert/ponytail` | `/ponytail [lite\|full\|ultra]`, `/ponytail-review`, `/ponytail-audit`, `/ponytail-debt`, `/ponytail-gain`, `/ponytail-help` | none |
 | [`skill-creator`](https://github.com/anthropics/skills/tree/main/skills/skill-creator) | `anthropics/skills` | none, it triggers on "write me a skill" | none |
 | [`godot-claude-harness`](https://github.com/DavidMGDev/godot-claude-harness) | `DavidMGDev/godot-claude-harness` | `/gd-check`, `/gd-run`, `/gd-verify`, `/gd-api`, `/gd-scene` | none |
 | [`godot-claude-skills`](https://github.com/alexmeckes/godot-claude-skills) | `alexmeckes/godot-claude-skills` | live editor control over `godot-mcp` | none |
 
-`ponytail` forces the laziest solution that actually works. `impeccable` is a design language for frontend work.
+`ponytail` forces the laziest solution that actually works. `impeccable` is a design language for frontend work. `perception-first-design` is Stefan Kovalik's Perception-First Design (CC BY-SA 4.0): a five-layer diagnostic from cognitive psychology for anything people look at, and the `perception-first` skill below drives it.
 
 `skill-creator` is Anthropic's meta-skill for writing skills. It drafts the `SKILL.md`, then runs your test prompts twice, once with the skill and once without, so you can see whether the skill actually changed the answer. It ships inside the `example-skills` plugin, so installing it also brings `mcp-builder`, `frontend-design`, `webapp-testing` and 8 more; there is no way to take just the one.
 
@@ -141,6 +142,7 @@ My own skills, and ones with no maintained upstream. **This folder is the source
 | [`handoff-clip`](skills/handoff-clip/SKILL.md) | Compacts the conversation into a handoff document and prints it as one copyable block, writing no files |
 | [`indie-game-doctor`](skills/indie-game-doctor/SKILL.md) | Diagnoses an indie game across concept, prototype, production and launch, gating the whole consultation on whether a stranger has played it, and citing the video behind every conclusion |
 | [`make-ci-skill`](skills/make-ci-skill/SKILL.md) | Writes a new skill into this repo, or edits one here, scrubs it for anything personal, installs it globally, and commits and pushes, all in one pass |
+| [`perception-first`](skills/perception-first/SKILL.md) | Runs the Perception-First Design plugin on a page, template, deck or copy, applies the fixes bottom-up, and turns every measurable requirement into a gate in the project's check script |
 | [`presentable`](skills/presentable/SKILL.md) | Turns a project's material into a slide deck from your HTMLP templates, asking who presents and for how long, or builds a new deck template from a brand and adds it to that repo |
 | [`readable`](skills/readable/SKILL.md) | Turns a project's material into a reading site from your HTMLR templates, deciding first whether it's read to understand or to study, or builds a new reader template from a brand and adds it to that repo |
 | [`windows-context-menu`](skills/windows-context-menu/SKILL.md) | Adds, places and de-duplicates Explorer right-click entries through the registry |
