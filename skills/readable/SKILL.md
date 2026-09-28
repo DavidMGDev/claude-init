@@ -47,7 +47,7 @@ If the user named one, use it. Otherwise read each `R/templates/*/template.json`
 
 Set `mode` in `content/index.md` and tell the user the choice in one line.
 
-- **`understand`** (the default) is for plans, visions, research, proposals and manuals. The hero shows a `summary` of 3 to 6 points that together say what the book concludes. Each chapter `subtitle` is that step's one-line takeaway, and `label: Step` often fits. No practice questions.
+- **`understand`** (the default) is for plans, visions, research, proposals and manuals. The hero shows a `summary` of 3 to 5 points that together say what the book concludes. Each chapter `subtitle` is that step's one-line takeaway, and `label: Step` often fits. No practice questions.
 - **`study`** is only for coursework the reader will be evaluated on: an exam, a course, a certification. It gets the full guide, practice questions and a score tracker.
 
 Quizzes and a long how-to guide on a plan read as noise. When unsure, it's `understand`.
@@ -72,7 +72,7 @@ On top of the contract:
 1. Read all the source material before outlining: the main document, research notes, anything the book draws on. Plan chapters in the order a reader needs the ideas. Use as few as the material allows (see "Keep it short").
 2. Delete the lorem chapters, and `content/media/figure.svg` unless you use it.
 3. Rename the callout signals to fit the book, in `UI.guide.callouts` and `UI.calloutNames` where the template has them. A plan might use Context, In practice, Key idea, Watch out and Deal-breaker. Keep each type's meaning the same across the whole book.
-4. Put real sources in each chapter's `sources`: file paths or URLs the chapter rests on.
+4. Put real sources in each chapter's `sources`: the public references the chapter rests on, as a title with its publisher and date, or a URL. Use file paths only when the readers can open those files. Most readers can't, so the book never points them at `VISION.md` or a research folder either.
 5. Write in the user's voice. Run `no-ai-slop` over the prose if it is installed, and `spanish-unslop` for Spanish.
 6. For a non-English book, set `lang`, translate every string in `UI` (the guide steps too), and change `<title>` in `index.html`.
 
@@ -100,6 +100,17 @@ Cut these, even when they are true:
 - hedges, transitions and recaps
 
 `study` mode needs coverage, so it runs longer. The same rule holds: the least text that covers the material.
+
+### The first screen
+
+On a phone the home hero is the first thing anyone sees, and it decides whether they read on. Every template follows TEMPLATE-STANDARD rule 13, which was derived with Perception-First Design, and `pnpm check` enforces it:
+
+- **`subtitle` is the thesis.** Use one line that sells the book's point in 16 words or fewer, not a description of the document.
+- **Each `summary` point leads with a headline.** Its first sentence renders bold and has to carry the point alone in 12 words or fewer. The detail after it is optional, and the whole point stays under 40 words.
+- **Housekeeping goes in front-matter.** Dates go in `updated`, and the other-language link goes in `translation` and `translationLabel`. They render as one quiet meta line above the title.
+- **The index body is one about line** of 40 words at most, saying who made the book and what it is. It's never a paragraph of housekeeping.
+
+Look at the phone screenshot before calling it done. If the first screen doesn't make someone want to read on, run `/perception-first` on it.
 
 ### Verify
 
