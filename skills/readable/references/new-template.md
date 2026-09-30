@@ -12,7 +12,7 @@ Read these before writing anything. They are short and they are the ground truth
 | `README.md` | The catalog. A new template adds one row, and the rows stay contiguous. |
 | `git log` | Each commit body explains a standard change and why it was made. Read the last ten. |
 | `templates/_skeleton/` | The five files with TODO markers: the outline of what a template must document. |
-| `templates/kadabra-reader/` | The most complete engine: system light and dark through surface tokens, every interface string in one `UI` object, a WCAG contrast audit in the check, and both home modes. The best base for a template derived from a brand. |
+| `templates/kadabra-reader/` | The most complete engine: system light and dark through surface tokens, every interface string in one `UI` object, a WCAG contrast audit in the check, both home modes and both layouts (book and page). The best base for a template derived from a brand. |
 | `templates/bauhaus-reader/` | The original engine. Light only, with the one-sentence reason in its DESIGN.md: the example of opting out of dark. |
 | `templates/pastel-bauhaus-reader/` | How a variant is made: same engine and layout, a new palette, and a DESIGN.md that says what changed. |
 
@@ -20,7 +20,7 @@ Inside any template:
 
 | File | Role |
 |---|---|
-| `DESIGN.md` | The asset. Sections: 0 why, 1 palette and surfaces, 2 type and grid, 3 glyphs and decoration, 4 motion, 5 layout (both home modes), 6 accessibility, 7 what `pnpm check` enforces, 8 anti-slop checklist. The code can be regenerated from it. |
+| `DESIGN.md` | The asset. Sections: 0 why, 1 palette and surfaces, 2 type and grid, 3 glyphs and decoration, 4 motion, 5 layout (both home modes, and the page layout of rule 14), 6 accessibility, 7 what `pnpm check` enforces, 8 anti-slop checklist. The code can be regenerated from it. |
 | `CONTENT.md` | The filler's contract: front-matter, every block with its syntax and limits, the `UI` fields, modes, placeholders. |
 | `README.md` | At most 80 lines, ending in a "For AI agents" block whose step 1 is deciding the mode. |
 | `src/content.js` | Parses front-matter and turns Markdown into blocks: callouts, quizzes, glyph mapping. No sentences. |
@@ -58,7 +58,7 @@ Inside any template:
 
     ```sh
     cd R/templates/<slug>
-    pnpm install && pnpm build && pnpm check && pnpm check:modes && pnpm shots
+    pnpm install && pnpm build && pnpm check && pnpm check:modes && pnpm check:page && pnpm shots
     ```
 
     All must pass. Look at the shots in both modes and both schemes. `preview.png` stays under 1.5 MB.
@@ -71,7 +71,7 @@ A fix or feature that every reader should have lands in all of them at once, the
 
 1. Change `TEMPLATE-STANDARD.md` first if a rule changes, then `_skeleton/`.
 2. Apply the change to every template, including its DESIGN.md, CONTENT.md, README "For AI agents" steps and `check.mjs`.
-3. Run `pnpm build && pnpm check:modes` in every template. All pass.
+3. Run `pnpm build && pnpm check:modes && pnpm check:page` in every template. All pass.
 4. Commit once, subject `Readers: <change>` or `Standard: <change>`, with a body that says what changed and why.
 
 If a filled reader in some project hit the bug, offer to port the fix into that copy too.
