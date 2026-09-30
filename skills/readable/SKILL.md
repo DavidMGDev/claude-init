@@ -8,7 +8,7 @@ argument-hint: "[template slug | 'template' to build a new one | language | what
 
 The user keeps reader templates in a private GitHub repo, `HTMLR-Templates`: Markdown goes in and a site built for reading comes out. This skill does one of two jobs with it:
 
-- **Fill:** copy a template into the current project and write the project's material into it as a book of chapters.
+- **Fill:** copy a template into the current project and write the project's material into it, as one page or as a book of chapters.
 - **Author:** add a new template to the repo, or improve the ones there.
 
 Fill is done when `pnpm check` exits 0 on the filled reader and the user has the local command or URL. Author is done when the new template passes `pnpm check:modes` and is committed and pushed on `main`.
@@ -43,14 +43,21 @@ Read `R/README.md` (the catalog) and `R/TEMPLATE-STANDARD.md` on every run. They
 
 If the user named one, use it. Otherwise read each `R/templates/*/template.json` (skip `_skeleton`) and ask one AskUserQuestion: one option per template, labelled with its slug, described by its catalog line and `theme`. Recommend the one whose brand matches the project, else a `system` theme one. Mention that each folder has a `preview.png` if they want to look first.
 
-### Decide the mode before any chapter
+### Decide the layout, then the mode
 
-Set `mode` in `content/index.md` and tell the user the choice in one line.
+Every template has two layouts (TEMPLATE-STANDARD rule 14). Set `layout` in `content/index.md` before writing anything.
+
+- **`page`** is the whole topic on one page, in the template's style, with no hero and no hook. It has a compact header, an optional "In short" block, the section map beside the text, then sources and the signal key. Use it for anything short: one argument, one decision, one explainer, one brief. Roughly: under 1,500 words and 6 sections, read in one sitting.
+- **`book`** (the default) is a hero, a contents list and a page per chapter. Use it when the material needs several sittings, the reader will come back to it, or it's coursework.
+
+When a topic could go either way, it's a page. A handful of thin chapters is the failure to avoid.
+
+Then set `mode`, and tell the user both choices in one line.
 
 - **`understand`** (the default) is for plans, visions, research, proposals and manuals. The hero shows a `summary` of 3 to 5 points that together say what the book concludes. Each chapter `subtitle` is that step's one-line takeaway, and `label: Step` often fits. No practice questions.
 - **`study`** is only for coursework the reader will be evaluated on: an exam, a course, a certification. It gets the full guide, practice questions and a score tracker.
 
-Quizzes and a long how-to guide on a plan read as noise. When unsure, it's `understand`.
+Quizzes and a long how-to guide on a plan read as noise. When unsure, it's `understand`. A page in `understand` mode takes `summary` as its optional "In short" block (none, or 3 to 5 points).
 
 ### Set up the folder
 
@@ -58,10 +65,19 @@ Copy the template into the project as `reader/`. A second language goes in its o
 
 ```sh
 cp -r "R/templates/<slug>" reader
-rm -rf reader/node_modules reader/dist* reader/shots reader/.wrangler
+rm -rf reader/node_modules reader/dist* reader/shots reader/.wrangler reader/content/samples
 ```
 
 Set `name` in `reader/package.json` to the project's name. Keep `pnpm-workspace.yaml` as it is.
+
+### Write a page
+
+For `layout: page`, write only `content/index.md` and delete the chapter files.
+
+- **Front-matter:** the book keys plus `layout: page`. `subtitle` is a one-sentence summary of the whole topic, 30 words at most. `summary` is optional. `sources` is a list that closes the page.
+- **Body:** `# Title`, an optional `>` lead, then 2 to 12 `##` sections.
+
+There is no hero, guide or about line, so the first-screen rules below don't apply. The header summary sentence does that job.
 
 ### Write the book
 
@@ -88,7 +104,7 @@ What the short version did right:
 
 - The home page was the title, a subtitle, 3 or 4 summary points and one line of body.
 - Each chapter opened with one lead line, then went straight to its points.
-- Each point was a table, a short list or a callout. Prose was two sentences at most.
+- Each point was one or two plain sentences, a short list whose items open with a bold lead, or a callout. Tables appeared only for real comparisons (TEMPLATE-STANDARD rule 15: at most one per `##` section, under 35% of the text).
 - Each item was one row or bullet per thing that changed, had to be done or went wrong. It gave the one number that mattered, not every number the source had.
 
 Cut these, even when they are true:
@@ -97,11 +113,12 @@ Cut these, even when they are true:
 - background the reader already knows
 - a point already made in another chapter
 - a chapter nobody asked for, such as "next steps" or a future stage
+- a table where two sentences would do, and empty space around small points
 - hedges, transitions and recaps
 
 `study` mode needs coverage, so it runs longer. The same rule holds: the least text that covers the material.
 
-### The first screen
+### The first screen (book layout)
 
 On a phone the home hero is the first thing anyone sees, and it decides whether they read on. Every template follows TEMPLATE-STANDARD rule 13, which was derived with Perception-First Design, and `pnpm check` enforces it:
 
@@ -118,11 +135,11 @@ Look at the phone screenshot before calling it done. If the first screen doesn't
 cd reader && pnpm install && pnpm build && pnpm check
 ```
 
-`pnpm check` audits every view at three widths, in light and dark when the theme is `system`. Fix each violation in the content: shorten, split a chapter, or pick another block. Never edit the check to make it pass.
+`pnpm check` audits every view at three widths, in light and dark when the theme is `system`, and applies the page rules when `layout: page` is set. Fix each violation in the content: shorten, split a chapter, or pick another block. Never edit the check to make it pass.
 
 Then count the words with `wc -w reader/content/*.md`. Reread each chapter and ask of every sentence, section and chapter whether the reader would miss it. If not, cut it, and merge what is left.
 
-Then look at it. `pnpm shots` writes screenshots to `shots/`. Read the home and one chapter at phone and desktop width, and check the hero summary says what the book concludes.
+Then look at it. `pnpm shots` writes screenshots to `shots/`. Read the home and one chapter at phone and desktop width, and check the hero summary says what the book concludes. For a page, the shots walk down the one view instead.
 
 ### Share
 
