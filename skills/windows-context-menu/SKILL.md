@@ -1,12 +1,48 @@
 ---
 name: windows-context-menu
-description: "Add, position, or de-duplicate entries in the Windows Explorer right-click menu through the registry. Use when adding an \"Open X here\" verb, when an entry lands in the wrong place or under Show more options, when a menu item appears twice, or when a context-menu command flashes a console window."
+description: "Add, position, or de-duplicate entries in the Windows Explorer right-click menu through the registry, and keep a ledger of every custom entry made. Use when adding an \"Open X here\" verb or a verb for one file type, when an entry lands in the wrong place or under Show more options, when a menu item appears twice, when a context-menu command flashes a console window, or when asked which custom entries exist."
 ---
 
 # Windows context menu
 
 Everything here was verified on Windows 11 26200 with the classic context menu
 enabled. Registry paths are `HKCU`, so none of it needs admin rights.
+
+## Record every change
+
+`entries.md` in this folder is the ledger of every custom entry and menu mod.
+Read it before adding anything, so you reuse a pattern that already works and
+know which key names you are sorting against. The job is not done until the
+ledger matches the registry:
+
+1. Add, edit or remove the row in `entries.md` for whatever you added, renamed,
+   moved or deleted. Write script paths as `<tools>\...` and the home folder as
+   `~`, since the skill is public and the registry already holds the real path.
+2. If the work taught something general, such as a placeholder that misbehaved
+   or a class key not listed here, put it in the matching section of this file.
+3. Ship both through `make-ci-skill` as an update to `windows-context-menu`.
+   This step is the owner's standing instruction, so run it without asking.
+   Where `make-ci-skill` is not installed, edit the copy in
+   `~/.claude/skills/windows-context-menu/` instead.
+
+To compare the ledger with what is really registered:
+
+```powershell
+$root = 'HKCU:\Software\Classes'
+$classes = 'Directory','Directory\Background','DesktopBackground','Drive','*','AllFileSystemObjects'
+$classes += Get-ChildItem -LiteralPath "$root\SystemFileAssociations" -ErrorAction SilentlyContinue |
+  ForEach-Object { "SystemFileAssociations\$($_.PSChildName)" }
+foreach ($c in $classes) {
+  $p = "$root\$c\shell"
+  if (Test-Path -LiteralPath $p) { Get-ChildItem -LiteralPath $p | ForEach-Object {
+    $cmd = (Get-ItemProperty -LiteralPath "$($_.PSPath)\command" -ErrorAction SilentlyContinue).'(default)'
+    '{0}\shell\{1} | {2} | {3}' -f $c, $_.PSChildName, (Get-ItemProperty -LiteralPath $_.PSPath).'(default)', $cmd } }
+}
+```
+
+A row in the registry with no row in the ledger was made outside this skill:
+add it. The sweep only covers the classes listed, so a verb registered under
+some other class exists only in the ledger.
 
 ## The two menus
 
@@ -109,11 +145,37 @@ Which class key to register under:
 | `Drive` | a drive in This PC |
 | `*` | any file |
 | `AllFileSystemObjects` | any file or folder |
+| `SystemFileAssociations\.ext` | a file with that extension |
 
 **Use `%V` for the path, not `%1`.** `%1` works under `Directory` but expands to
 nothing under `Directory\Background`. `%V` is correct for both. Guard against a
 trailing backslash when the target may be a drive root: `"C:\"` ends up
-escaping the closing quote.
+escaping the closing quote. Writing `"%V."` is the shortest guard, and the
+Claude Code entry in `entries.md` relies on it.
+
+### One file type only
+
+Register under `SystemFileAssociations\.<ext>`, not under the extension's
+ProgID. The ProgID belongs to whichever app currently opens the type, so a verb
+placed there disappears when the default app changes.
+
+```powershell
+$key = 'HKCU:\Software\Classes\SystemFileAssociations\.ogg\shell\ConvertToMp3'
+New-Item -Path "$key\command" -Force | Out-Null
+Set-ItemProperty -Path $key -Name '(default)' -Value 'Convert to MP3'
+Set-ItemProperty -Path "$key\command" -Name '(default)' -Value 'wscript.exe "C:\Path\ogg2mp3.vbs" "%1"'
+```
+
+- `%1` is the file's full path, and it is the right placeholder here.
+- With several files selected, Explorer starts the command once per file, all
+  at the same time. Three selected files gave three conversions.
+- Past 15 selected files the verb does nothing: sixteen gave zero conversions.
+  Microsoft documents the limit and the `MultipleInvokePromptMinimum` DWORD
+  under `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer` that raises
+  it (KB 2022295). Raising it was not tested here.
+- A command line cannot build "same name, other extension" by itself.
+  `%~dpn1` only works inside a batch file. Pass `%1` to a script and derive the
+  output path there.
 
 ### Cascading submenu
 
@@ -146,6 +208,64 @@ console it no longer has:
 ```powershell
 (New-Object -ComObject WScript.Shell).Popup($message, 0, 'Title', 16) | Out-Null
 ```
+
+### One executable, no PowerShell
+
+When the verb only has to run one program, the `.vbs` can do the whole job:
+derive the output path, run the program hidden, wait, and show a dialog only on
+failure. This is the script behind the `.ogg` verb above.
+
+```vbs
+Dim fso, src, dst, rc
+Set fso = CreateObject("Scripting.FileSystemObject")
+If WScript.Arguments.Count = 0 Then WScript.Quit 1
+src = WScript.Arguments(0)
+dst = fso.BuildPath(fso.GetParentFolderName(src), fso.GetBaseName(src) & ".mp3")
+If fso.FileExists(dst) Then
+  MsgBox "Already exists, skipped:" & vbCrLf & dst, 48, "OGG to MP3"
+  WScript.Quit 1
+End If
+rc = CreateObject("WScript.Shell").Run("ffmpeg.exe -loglevel error -i """ & src & _
+     """ -vn -q:a 2 """ & dst & """", 0, True)
+If rc <> 0 Then MsgBox "ffmpeg failed (exit " & rc & ") on:" & vbCrLf & src, 16, "OGG to MP3"
+```
+
+- **Write the program name with its extension.** `Run("ffmpeg ...", 0, True)`
+  fails with `Unable to wait for process`, while `ffmpeg.exe` and
+  `cmd /c ffmpeg` both work. The cause was not found.
+- **Debug with `cscript //nologo script.vbs args`.** Under `wscript` a script
+  error goes to a dialog and the exit code is still 0, so a failed run from a
+  terminal looks like a success that produced nothing.
+- **The program has to be on Explorer's PATH**, which is the saved user and
+  machine PATH, not the PATH of the shell you are testing from:
+
+  ```powershell
+  $saved = [Environment]::GetEnvironmentVariable('Path','User') + ';' +
+           [Environment]::GetEnvironmentVariable('Path','Machine')
+  $saved -split ';' | Where-Object { $_ -and (Test-Path (Join-Path $_ 'ffmpeg.exe')) }
+  ```
+
+- Paths with spaces, apostrophes, `%` and `&` came through this script intact.
+- Keep the script in a folder that will not be cleaned up or moved, because the
+  registry stores its absolute path.
+
+## Testing a verb without the mouse
+
+`Shell.Application` builds the same verb list Explorer does, so it can confirm
+that an entry shows on the right items and can invoke it:
+
+```powershell
+$ns = (New-Object -ComObject Shell.Application).Namespace('C:\Path\to\folder')
+$ns.ParseName('song.ogg').Verbs() | ForEach-Object Name          # what the menu holds
+($ns.ParseName('song.ogg').Verbs() | Where-Object Name -eq 'Convert to MP3').DoIt()
+
+$items = $ns.Items(); $items.Filter(0x40, '*.ogg')               # a multi-selection
+$items.InvokeVerbEx('ConvertToMp3')                              # by key name
+```
+
+`Verbs()` matches on the label and `InvokeVerbEx` on the key name. Both return
+at once, so poll for the result. This reads the registry fresh, so it proves the
+registration and the command, not that Explorer has refreshed its cache.
 
 ## De-duplicating an entry
 

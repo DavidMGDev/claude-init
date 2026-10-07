@@ -146,7 +146,7 @@ My own skills, and ones with no maintained upstream. **This folder is the source
 | [`presentable`](skills/presentable/SKILL.md) | Turns a project's material into a slide deck from your HTMLP templates, asking who presents and for how long, or builds a new deck template from a brand and adds it to that repo |
 | [`readable`](skills/readable/SKILL.md) | Turns a project's material into a reading site from your HTMLR templates, deciding first whether it's read to understand or to study, or builds a new reader template from a brand and adds it to that repo |
 | [`spanish-unslop`](skills/spanish-unslop/SKILL.md) | Writes or edits Spanish copy in plain Costa Rican Spanish with ustedeo, built from line-by-line corrections to AI drafts, or flags the slop without rewriting |
-| [`windows-context-menu`](skills/windows-context-menu/SKILL.md) | Adds, places and de-duplicates Explorer right-click entries through the registry |
+| [`windows-context-menu`](skills/windows-context-menu/SKILL.md) | Adds, places and de-duplicates Explorer right-click entries through the registry, and keeps a ledger of every custom one |
 
 `arena` and `blast-radius` are adapted from pstack (MIT), with its dead `~/.cursor/rules` and "principle skill" references stripped out.
 
