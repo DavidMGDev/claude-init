@@ -55,13 +55,14 @@ hands off to `pastemd.ps1`. Background only.
 
 | | |
 | --- | --- |
-| Keys | `SystemFileAssociations\.ogg\shell\ConvertToMp3` |
+| Keys | `SystemFileAssociations\.ogg\shell\ConvertToMp3`, `SystemFileAssociations\.webm\shell\ConvertToMp3` |
 | Command | `wscript.exe "<scratch>\ogg2mp3\ogg2mp3.vbs" "%1"` |
 | Icon | none |
-| Recorded | 2026-10-06, added |
+| Recorded | 2026-10-06, added for `.ogg`, then `.webm` the same day |
 
-Shows on `.ogg` files only and writes `<name>.mp3` beside the source with
-`ffmpeg.exe -vn -q:a 2`. It skips with a dialog when the `.mp3` already exists.
+Shows on `.ogg` and `.webm` files only and writes `<name>.mp3` beside the source
+with `ffmpeg.exe -vn -q:a 2`, so a `.webm` with video gives its audio track.
+Both keys run the same script. It skips with a dialog when the `.mp3` already exists.
 The script is the one printed in `SKILL.md` under "One executable, no
 PowerShell". Needs ffmpeg on the saved PATH. Works on up to 15 selected files.
 The script sits in a scratch folder, not with the other tools, so the entry

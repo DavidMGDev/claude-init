@@ -167,6 +167,8 @@ Set-ItemProperty -Path "$key\command" -Name '(default)' -Value 'wscript.exe "C:\
 ```
 
 - `%1` is the file's full path, and it is the right placeholder here.
+- For a second file type, write the same verb key under that extension too and
+  point it at the same script. `.webm` reuses the `.ogg` script this way.
 - With several files selected, Explorer starts the command once per file, all
   at the same time. Three selected files gave three conversions.
 - Past 15 selected files the verb does nothing: sixteen gave zero conversions.
@@ -222,12 +224,12 @@ If WScript.Arguments.Count = 0 Then WScript.Quit 1
 src = WScript.Arguments(0)
 dst = fso.BuildPath(fso.GetParentFolderName(src), fso.GetBaseName(src) & ".mp3")
 If fso.FileExists(dst) Then
-  MsgBox "Already exists, skipped:" & vbCrLf & dst, 48, "OGG to MP3"
+  MsgBox "Already exists, skipped:" & vbCrLf & dst, 48, "Convert to MP3"
   WScript.Quit 1
 End If
 rc = CreateObject("WScript.Shell").Run("ffmpeg.exe -loglevel error -i """ & src & _
      """ -vn -q:a 2 """ & dst & """", 0, True)
-If rc <> 0 Then MsgBox "ffmpeg failed (exit " & rc & ") on:" & vbCrLf & src, 16, "OGG to MP3"
+If rc <> 0 Then MsgBox "ffmpeg failed (exit " & rc & ") on:" & vbCrLf & src, 16, "Convert to MP3"
 ```
 
 - **Write the program name with its extension.** `Run("ffmpeg ...", 0, True)`
