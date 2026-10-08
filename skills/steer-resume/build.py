@@ -96,7 +96,7 @@ def check_pdf(pdf, d, pages):
     for i, lines in enumerate(pg, 1):
         for l in lines:
             t = l.strip()   # ponytail: a short last line counts as an orphan, so a real two-word line can trip this. Reword or ignore.
-            if t and len(t) < 15 and len(t.split()) <= 2 and not t.isupper() and t != d["name"]:
+            if t and len(t) < 22 and len(t.split()) <= 2 and not t.isupper() and t != d["name"]:
                 bad.append(f"orphan line on page {i}: '{t}'")
     last = lambda lines: max(i for i, l in enumerate(lines) if l.strip())
     if len(pg) > 1:
