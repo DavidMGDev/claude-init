@@ -83,7 +83,8 @@ const PLUGINS = [
 // design-taste-frontend only earn their keep on frontend work, deslop-jupyter
 // only for coursework, skill-creator is for the rare day I write a skill and it pulls in 11 sibling
 // skills with it, windows-context-menu is a reference I reach for a few times
-// a year, indie-game-doctor only for game work.
+// a year, indie-game-doctor only for game work, steer-resume only while
+// applying for jobs.
 const DEFAULT_OFF = new Set([
   "impeccable",
   "design-taste-frontend",
@@ -93,6 +94,7 @@ const DEFAULT_OFF = new Set([
   "godot-claude-harness",
   "godot-claude-skills",
   "windows-context-menu",
+  "steer-resume",
 ]);
 
 const REMOTE_SKILLS = [
