@@ -1,6 +1,6 @@
 # Authoring a presentation or page template
 
-How to add a template to HTMLP-Templates, or change the ones there. `P` is the repo folder found in step 2 of the skill. Work on `main` and push there.
+How to add a template to the presentable repo, or change the ones there. `P` is the repo folder found in step 2 of the skill. Work on `main` and push there.
 
 ## Where to look
 
@@ -13,6 +13,7 @@ Read these before writing anything. They are short and they are the ground truth
 | `git log` | Commit bodies explain each standard change and why. |
 | `templates/_skeleton/` | The five files with TODO markers, plus a starter `index.html` for a `single` kind template. |
 | `templates/pixel-deck/` | The reference project template: a 1920×1080 arrow-key deck with a check that enforces its design. Copy its engine shape. |
+| `templates/gmtk-deck/` | A second look on the same engine: `deck.js` barely changes, while the CSS, the background (`src/bg.js`), the icons and the check are new. Its check also audits palette, contrast and text running off the stage. |
 
 Inside `pixel-deck`:
 
@@ -31,7 +32,7 @@ Inside `pixel-deck`:
 | `scripts/shots.mjs` | Screenshots into `shots/` and the contact sheet. |
 | `vendor/` | Fonts and icons with `FONTS.md`, `ICONS.md` and licences. |
 
-The sister repo, HTMLR-Templates, has a newer standard (a `theme` field, a contrast audit, a topic grep gate). Port a lesson from it only when it fits a projected, fixed-size stage, and change `TEMPLATE-STANDARD.md` first when you do.
+The sister repo, readable, has a newer standard (a `theme` field, a contrast audit, a topic grep gate). Port a lesson from it only when it fits a projected, fixed-size stage, and change `TEMPLATE-STANDARD.md` first when you do.
 
 ## New template from a brand or style
 

@@ -1,12 +1,12 @@
 ---
 name: presentable
-description: "Turn the material in the current project into a slide deck or presentation page built from one of the user's HTMLP templates, or add a new presentation or page template to the HTMLP-Templates repo from a brand or style. Use for /presentable, 'make this presentable', 'make slides for this', 'turn this into a deck', 'a presentation for the meeting', 'new deck template', 'make a slide template from this brand or site', or when material has to be presented to an audience rather than read on one's own."
+description: "Turn the material in the current project into a slide deck or presentation page built from a template in the presentable repo, or add a new presentation or page template to that repo from a brand or style. Use for /presentable, 'make this presentable', 'make slides for this', 'turn this into a deck', 'a presentation for the meeting', 'new deck template', 'make a slide template from this brand or site', or when material has to be presented to an audience rather than read on one's own."
 argument-hint: "[template slug | 'template' to build a new one | speakers, length or language | what to present]"
 ---
 
 # Presentable
 
-The user keeps presentation and page templates in a private GitHub repo, `HTMLP-Templates`. Each is a fixed-stage HTML deck or page with its own design rules and an acceptance check. This skill does one of two jobs with it:
+Presentation and page templates live in a GitHub repo named `presentable`. Each is a fixed-stage HTML deck or page with its own design rules and an acceptance check, already designed and tested, so filling one costs the slides' own words and no layout, CSS or navigation code. This skill does one of two jobs with the repo:
 
 - **Fill:** copy a template into the current project and turn the project's material into slides.
 - **Author:** add a new template to the repo, or improve the ones there.
@@ -15,7 +15,7 @@ Fill is done when `pnpm check` exits 0 on the filled deck and the user knows how
 
 ## 1. Pick the job
 
-Author when the user asks for a template itself: "new template", "a deck template from this brand, site or style", "contribute to HTMLP", "add a slide style". Also Author when they want a look captured for reuse, or an engine fix every deck should get. Otherwise Fill.
+Author when the user asks for a template itself: "new template", "a deck template from this brand, site or style", "contribute to presentable", "add a slide style". Also Author when they want a look captured for reuse, or an engine fix every deck should get. Otherwise Fill.
 
 If the request names a style and material together ("slides for this in our brand"), Fill with the matching template when one exists. When none does, Author it first, then Fill with it.
 
@@ -24,16 +24,20 @@ If the request names a style and material together ("slides for this in our bran
 Look for a local clone first (Git Bash, about two seconds):
 
 ```sh
-find ~ -maxdepth 5 -type f -name TEMPLATE-STANDARD.md -path '*HTMLP-Templates*' -not -path '*/node_modules/*' -not -path '*/AppData/*' 2>/dev/null
+find ~ -maxdepth 5 -type f -path '*/presentable/TEMPLATE-STANDARD.md' -not -path '*/node_modules/*' -not -path '*/AppData/*' 2>/dev/null
 ```
+
+A clone under another folder name counts too: it is the one whose `git remote get-url origin` ends in `/presentable` or `/presentable.git`.
 
 - **One hit:** its folder is `P`. Run `git -C P pull --ff-only`.
 - **Several:** `git fetch` each, use the clean one that is current with `origin/main`, and tell the user about the extra clones.
 - **None:** clone it. For Fill a temp folder is fine. For Author, ask once where the clone should live.
 
 ```sh
-gh repo clone "$(gh api user --jq .login)/HTMLP-Templates" <dir>
+gh repo clone "$(gh api user --jq .login)/presentable" <dir>
 ```
+
+If the user has no repo by that name, ask once for the owner of the one they use.
 
 Read `P/README.md` (the catalog) and `P/TEMPLATE-STANDARD.md` on every run. They change, and where they disagree with this skill, they win.
 

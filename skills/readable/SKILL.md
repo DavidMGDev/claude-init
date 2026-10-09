@@ -1,12 +1,12 @@
 ---
 name: readable
-description: "Turn the material in the current project (plans, visions, research, notes, docs, coursework) into a reading site built from one of the user's HTMLR reader templates, or add a new reader template to the HTMLR-Templates repo from a brand or style. Use for /readable, 'make this readable', 'turn this into a reader', 'make a reader for this', 'a readable version in Spanish', 'new reader template', 'make a reader template from this brand or site', or when long-form material should become a site to read rather than a slide deck."
+description: "Turn the material in the current project (plans, visions, research, notes, docs, coursework) into a reading site built from a template in the readable repo, or add a new reader template to that repo from a brand or style. Use for /readable, 'make this readable', 'turn this into a reader', 'make a reader for this', 'a readable version in Spanish', 'new reader template', 'make a reader template from this brand or site', or when long-form material should become a site to read rather than a slide deck."
 argument-hint: "[template slug | 'template' to build a new one | language | what to turn into a reader]"
 ---
 
 # Readable
 
-The user keeps reader templates in a private GitHub repo, `HTMLR-Templates`: Markdown goes in and a site built for reading comes out. This skill does one of two jobs with it:
+Reader templates live in a GitHub repo named `readable`: Markdown goes in and a site built for reading comes out. Each template is already designed and tested, so filling one costs a few hundred lines of Markdown and no layout, CSS or navigation code. This skill does one of two jobs with the repo:
 
 - **Fill:** copy a template into the current project and write the project's material into it, as one page or as a book of chapters.
 - **Author:** add a new template to the repo, or improve the ones there.
@@ -15,7 +15,7 @@ Fill is done when `pnpm check` exits 0 on the filled reader and the user has the
 
 ## 1. Pick the job
 
-Author when the user asks for a template itself: "new template", "a template from this brand, site or style", "contribute to HTMLR", "add a reader style". Also Author when they want the look of something captured for reuse, or an engine fix or feature that every reader should get. Otherwise Fill.
+Author when the user asks for a template itself: "new template", "a template from this brand, site or style", "contribute to readable", "add a reader style". Also Author when they want the look of something captured for reuse, or an engine fix or feature that every reader should get. Otherwise Fill.
 
 If the request names a style and material together ("make this readable in our brand"), Fill with the matching template when one exists. When none does, Author it first, then Fill with it.
 
@@ -24,16 +24,20 @@ If the request names a style and material together ("make this readable in our b
 Look for a local clone first (Git Bash, about two seconds):
 
 ```sh
-find ~ -maxdepth 5 -type f -name TEMPLATE-STANDARD.md -path '*HTMLR-Templates*' -not -path '*/node_modules/*' -not -path '*/AppData/*' 2>/dev/null
+find ~ -maxdepth 5 -type f -path '*/readable/TEMPLATE-STANDARD.md' -not -path '*/node_modules/*' -not -path '*/AppData/*' 2>/dev/null
 ```
+
+A clone under another folder name counts too: it is the one whose `git remote get-url origin` ends in `/readable` or `/readable.git`.
 
 - **One hit:** its folder is `R`. Run `git -C R pull --ff-only`.
 - **Several:** `git fetch` each, use the clean one that is current with `origin/main`, and tell the user about the extra clones.
 - **None:** clone it. For Fill a temp folder is fine. For Author, ask once where the clone should live.
 
 ```sh
-gh repo clone "$(gh api user --jq .login)/HTMLR-Templates" <dir>
+gh repo clone "$(gh api user --jq .login)/readable" <dir>
 ```
+
+If the user has no repo by that name, ask once for the owner of the one they use.
 
 Read `R/README.md` (the catalog) and `R/TEMPLATE-STANDARD.md` on every run. They change, and where they disagree with this skill, they win.
 
@@ -58,6 +62,10 @@ Then set `mode`, and tell the user both choices in one line.
 - **`study`** is only for coursework the reader will be evaluated on: an exam, a course, a certification. It gets the full guide, practice questions and a score tracker.
 
 Quizzes and a long how-to guide on a plan read as noise. When unsure, it's `understand`. A page in `understand` mode takes `summary` as its optional "In short" block (none, or 3 to 5 points).
+
+### Feedback boxes
+
+Every template can collect the reader's notes, and it is off by default. Turn it on only when the user asks for it ("collect feedback", "let them comment on each section", "I want to answer it part by part"): set `feedback: true` in `content/index.md`. Each section then ends in a box, and a panel at the end of the page or chapter copies or downloads every note as one Markdown file, a heading per section with the note under it. Notes stay in the reader's browser. Keep sections small enough to answer one at a time.
 
 ### Set up the folder
 

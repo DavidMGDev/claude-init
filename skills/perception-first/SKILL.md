@@ -63,7 +63,7 @@ Lower layers win conflicts. Then find the smallest change that satisfies all fiv
 
 ## 5. Turn requirements into checks
 
-A requirement nobody enforces drifts back within a few edits. For each one that can be measured, add a gate to the project's acceptance script (`pnpm check` in the user's HTMLR readers and HTMLP decks), and restate it in the design doc the script belongs to. The first-screen gates from the HTMLR derivation are a good pattern:
+A requirement nobody enforces drifts back within a few edits. For each one that can be measured, add a gate to the project's acceptance script (`pnpm check` in the user's readable readers and presentable decks), and restate it in the design doc the script belongs to. The first-screen gates from the readable derivation are a good pattern:
 
 | Requirement | Gate |
 |---|---|

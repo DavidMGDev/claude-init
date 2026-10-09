@@ -1,6 +1,6 @@
 # Authoring a reader template
 
-How to add a template to HTMLR-Templates, or change the ones there. `R` is the repo folder found in step 2 of the skill. Work on `main` and push there; the user doesn't want feature branches in this repo.
+How to add a template to the readable repo, or change the ones there. `R` is the repo folder found in step 2 of the skill. Work on `main` and push there; the user doesn't want feature branches in this repo.
 
 ## Where to look
 
@@ -8,13 +8,14 @@ Read these before writing anything. They are short and they are the ground truth
 
 | Path | What it tells you |
 |---|---|
-| `TEMPLATE-STANDARD.md` | The five mandatory files, the `template.json` schema, and the 12 rules every template obeys. Read all of it. |
+| `TEMPLATE-STANDARD.md` | The five mandatory files, the `template.json` schema, and the rules every template obeys. Read all of it. |
 | `README.md` | The catalog. A new template adds one row, and the rows stay contiguous. |
 | `git log` | Each commit body explains a standard change and why it was made. Read the last ten. |
 | `templates/_skeleton/` | The five files with TODO markers: the outline of what a template must document. |
 | `templates/kadabra-reader/` | The most complete engine: system light and dark through surface tokens, every interface string in one `UI` object, a WCAG contrast audit in the check, both home modes and both layouts (book and page). The best base for a template derived from a brand. |
 | `templates/bauhaus-reader/` | The original engine. Light only, with the one-sentence reason in its DESIGN.md: the example of opting out of dark. |
 | `templates/pastel-bauhaus-reader/` | How a variant is made: same engine and layout, a new palette, and a DESIGN.md that says what changed. |
+| `templates/gmtk-reader/` | The newest engine: a canvas background (`src/topo.js`), a display title split into a filled and an outlined half, and the feedback boxes of rule 16 styled as part of the look. |
 
 Inside any template:
 
@@ -25,6 +26,7 @@ Inside any template:
 | `README.md` | At most 80 lines, ending in a "For AI agents" block whose step 1 is deciding the mode. |
 | `src/content.js` | Parses front-matter and turns Markdown into blocks: callouts, quizzes, glyph mapping. No sentences. |
 | `src/main.js` | The `UI` object at the top (every interface string), then routing, the two home variants, chapters, TOC, quiz grading. |
+| `src/feedback.js` | The opt-in feedback boxes (rule 16). The same file in every template; its labels are `UI.feedback` and its styles are the template's own. |
 | `src/reader.css` | Font faces, then palette and surface tokens at the top. Components only read surface tokens. |
 | `index.html` | Shell and the inline SVG sprite for glyphs. |
 | `scripts/check.mjs` | The acceptance gate. Holds the allowed palette hexes, fonts and radii, so it changes with the design. |
