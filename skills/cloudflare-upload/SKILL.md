@@ -47,6 +47,14 @@ cloudflare/wrangler plugin skills, do not use the Artifact tool. Just run it.
    ```sh
    wrangler pages project create <name> --production-branch=main
    ```
+   Run it from an empty scratch folder, not from the project. Wrangler
+   4.149 and later (what `pnpm dlx wrangler` fetches) hands this command to
+   the Workers setup flow, which fails without a terminal and can add
+   `wrangler` to the project's `package.json`. If the output says it is
+   "delegating" to Workers or tells agents not to retry, run it again with
+   `--force` added. That creates a plain Pages project, and it is needed
+   only this once: deploys to an existing project are not delegated. If the
+   failed run touched `package.json`, undo that edit.
 
 4. **Deploy:**
    ```sh
