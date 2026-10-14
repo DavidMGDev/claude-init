@@ -51,9 +51,9 @@ Per-repo entries are never left out, since each repo needs its own install and s
 | | |
 |---|---|
 | **On** | `mattpocock-skills`, `ponytail`, `perception-first-design`, `no-ai-slop`, `arena`, `blast-radius`, `handoff-clip`, `cloudflare-upload`, `make-ci-skill`, `perception-first`, `presentable`, `readable`, `spanish-unslop` |
-| **Opt-in** | `impeccable`, `design-taste-frontend`, `deslop-jupyter`, `indie-game-doctor`, `skill-creator`, `godot-claude-harness`, `godot-claude-skills`, `steer-resume`, `windows-context-menu` |
+| **Opt-in** | `impeccable`, `design-taste-frontend`, `deslop-jupyter`, `indie-game-doctor`, `skill-creator`, `godot-claude-harness`, `godot-claude-skills`, `steer-resume`, `vibe-wise`, `windows-context-menu` |
 
-Opt-in entries are marked `opt-in` and start unticked, so you can still tell which ones were off by default after toggling a few. Nothing about them is worse; they just aren't wanted everywhere. `impeccable` and `design-taste-frontend` only earn their keep on frontend work, `deslop-jupyter` only for coursework, `skill-creator` is for the rare day you write a skill and it pulls in 11 sibling skills with it, `windows-context-menu` is a reference for a few times a year, `steer-resume` only matters while you are applying for jobs, and `indie-game-doctor` is only for game work.
+Opt-in entries are marked `opt-in` and start unticked, so you can still tell which ones were off by default after toggling a few. Nothing about them is worse; they just aren't wanted everywhere. `impeccable` and `design-taste-frontend` only earn their keep on frontend work, `deslop-jupyter` only for coursework, `skill-creator` is for the rare day you write a skill and it pulls in 11 sibling skills with it, `windows-context-menu` is a reference for a few times a year, `steer-resume` only matters while you are applying for jobs, `indie-game-doctor` is only for game work, and `vibe-wise` only while you are learning a stack.
 
 The split is one line, `DEFAULT_OFF`, near the top of [`bin/claude-init.js`](bin/claude-init.js). Anything not named there is on.
 
@@ -109,8 +109,9 @@ Marketplace plugins, so they update themselves. A marketplace Claude Code does n
 | [`skill-creator`](https://github.com/anthropics/skills/tree/main/skills/skill-creator) | `anthropics/skills` | none, it triggers on "write me a skill" | none |
 | [`godot-claude-harness`](https://github.com/DavidMGDev/godot-claude-harness) | `DavidMGDev/godot-claude-harness` | `/gd-check`, `/gd-run`, `/gd-verify`, `/gd-api`, `/gd-scene` | none |
 | [`godot-claude-skills`](https://github.com/alexmeckes/godot-claude-skills) | `alexmeckes/godot-claude-skills` | live editor control over `godot-mcp` | none |
+| [`vibe-wise`](https://github.com/nykooi1/vibe-wise) | Anthropic Directory | `/vibe-wise:learn`, `/vibe-wise:reset` | none |
 
-`ponytail` forces the laziest solution that actually works. `impeccable` is a design language for frontend work. `perception-first-design` is Stefan Kovalik's Perception-First Design (CC BY-SA 4.0): a five-layer diagnostic from cognitive psychology for anything people look at, and the `perception-first` skill below drives it.
+`ponytail` forces the laziest solution that actually works. `impeccable` is a design language for frontend work. `perception-first-design` is Stefan Kovalik's Perception-First Design (CC BY-SA 4.0): a five-layer diagnostic from cognitive psychology for anything people look at, and the `perception-first` skill below drives it. `vibe-wise` (MIT) is a learning mode: Claude asks for your design first, explains what you don't know yet, and only writes the code you agreed to. It stays silent until you run `/vibe-wise:learn` in a project, keeps its notes in that project's `.vibe-wise/`, and its session hook needs `python3` on PATH.
 
 `skill-creator` is Anthropic's meta-skill for writing skills. It drafts the `SKILL.md`, then runs your test prompts twice, once with the skill and once without, so you can see whether the skill actually changed the answer. It ships inside the `example-skills` plugin, so installing it also brings `mcp-builder`, `frontend-design`, `webapp-testing` and 8 more; there is no way to take just the one.
 

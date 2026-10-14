@@ -76,6 +76,12 @@ const PLUGINS = [
     // Writes PRODUCT.md and DESIGN.md into the repo, so it is per-repo.
     setup: "/impeccable init",
   },
+  {
+    // Pinned to the commit the Anthropic Directory lists. Its hook needs python3.
+    name: "vibe-wise@anthropic-plugin-directory",
+    label: "vibe-wise",
+    about: "Noah Kim, MIT. /vibe-wise:learn: you design, Claude writes the agreed code",
+  },
 ];
 
 // Ticked in the picker unless named here. Nothing about an opt-in entry is
@@ -84,7 +90,7 @@ const PLUGINS = [
 // only for coursework, skill-creator is for the rare day I write a skill and it pulls in 11 sibling
 // skills with it, windows-context-menu is a reference I reach for a few times
 // a year, indie-game-doctor only for game work, steer-resume only while
-// applying for jobs.
+// applying for jobs, vibe-wise only while learning a stack.
 const DEFAULT_OFF = new Set([
   "impeccable",
   "design-taste-frontend",
@@ -95,6 +101,7 @@ const DEFAULT_OFF = new Set([
   "godot-claude-skills",
   "windows-context-menu",
   "steer-resume",
+  "vibe-wise",
 ]);
 
 const REMOTE_SKILLS = [
