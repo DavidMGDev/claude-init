@@ -58,15 +58,15 @@ hands off to `pastemd.ps1`. Background only.
 | Keys | `SystemFileAssociations\.ogg\shell\ConvertToMp3`, and the same key under each extension listed below |
 | Command | `wscript.exe "<scratch>\ogg2mp3\ogg2mp3.vbs" "%1"` |
 | Icon | none |
-| Recorded | 2026-10-06 for `.ogg` and `.webm`, 2026-10-09 for the other seventeen |
+| Recorded | 2026-10-06 for `.ogg` and `.webm`, 2026-10-09 for seventeen more, 2026-10-14 for `.mp4` |
 
 Extensions: `.ogg` `.webm` `.opus` `.oga` `.weba` `.spx` `.m4a` `.aac` `.flac`
-`.wma` `.amr` `.aiff` `.aif` `.wv` `.mka` `.ac3` `.caf` `.3ga` `.wav`. Each was
+`.wma` `.amr` `.aiff` `.aif` `.wv` `.mka` `.ac3` `.caf` `.3ga` `.wav` `.mp4`. Each was
 converted once from a generated file. `.mp3` is left out on purpose, and `.ape`
 because ffmpeg cannot write one to test with.
 
 Shows on those files only and writes `<name>.mp3` beside the source with
-`ffmpeg.exe -vn -q:a 2`, so a `.webm` with video gives its audio track.
+`ffmpeg.exe -vn -q:a 2`, so a `.webm` or `.mp4` with video gives its audio track.
 Every key runs the same script. It skips with a dialog when the `.mp3` already exists.
 The script is the one printed in `SKILL.md` under "One executable, no
 PowerShell". Needs ffmpeg on the saved PATH. Works on up to 15 selected files.
