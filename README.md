@@ -51,9 +51,9 @@ Per-repo entries are never left out, since each repo needs its own install and s
 | | |
 |---|---|
 | **On** | `mattpocock-skills`, `ponytail`, `perception-first-design`, `no-ai-slop`, `arena`, `blast-radius`, `handoff-clip`, `cloudflare-upload`, `make-ci-skill`, `perception-first`, `presentable`, `readable`, `spanish-unslop` |
-| **Opt-in** | `impeccable`, `design-taste-frontend`, `deslop-jupyter`, `indie-game-doctor`, `skill-creator`, `godot-claude-harness`, `godot-claude-skills`, `steer-resume`, `vibe-wise`, `windows-context-menu` |
+| **Opt-in** | `impeccable`, `design-taste-frontend`, `deslop-jupyter`, `indie-game-doctor`, `skill-creator`, `godot-claude-harness`, `godot-claude-skills`, `steer-resume`, `vibe-wise`, `vibe-wise-on`, `windows-context-menu` |
 
-Opt-in entries are marked `opt-in` and start unticked, so you can still tell which ones were off by default after toggling a few. Nothing about them is worse; they just aren't wanted everywhere. `impeccable` and `design-taste-frontend` only earn their keep on frontend work, `deslop-jupyter` only for coursework, `skill-creator` is for the rare day you write a skill and it pulls in 11 sibling skills with it, `windows-context-menu` is a reference for a few times a year, `steer-resume` only matters while you are applying for jobs, `indie-game-doctor` is only for game work, and `vibe-wise` only while you are learning a stack.
+Opt-in entries are marked `opt-in` and start unticked, so you can still tell which ones were off by default after toggling a few. Nothing about them is worse; they just aren't wanted everywhere. `impeccable` and `design-taste-frontend` only earn their keep on frontend work, `deslop-jupyter` only for coursework, `skill-creator` is for the rare day you write a skill and it pulls in 11 sibling skills with it, `windows-context-menu` is a reference for a few times a year, `steer-resume` only matters while you are applying for jobs, `indie-game-doctor` is only for game work, and `vibe-wise` and `vibe-wise-on` only while you are learning a stack.
 
 The split is one line, `DEFAULT_OFF`, near the top of [`bin/claude-init.js`](bin/claude-init.js). Anything not named there is on.
 
@@ -149,6 +149,7 @@ My own skills, and ones with no maintained upstream. **This folder is the source
 | [`sol-luna-gpt-api-oct26`](skills/sol-luna-gpt-api-oct26/SKILL.md) | Field notes on OpenAI's Sol and Luna models as of October 2026: the real ids, prices, effort levels, why tools need the Responses API, the one-call-per-turn habit and its fix, latency, a judged comparison, and how to test and deploy them |
 | [`spanish-unslop`](skills/spanish-unslop/SKILL.md) | Writes or edits Spanish copy in plain Costa Rican Spanish with ustedeo, built from line-by-line corrections to AI drafts, or flags the slop without rewriting |
 | [`steer-resume`](skills/steer-resume/SKILL.md) | Points your approved resume at one job posting: studies the company, its hiring process and the system that parses the file, makes the smallest edits to the base, and builds a PDF that a script checks against your standing corrections |
+| [`vibe-wise-on`](skills/vibe-wise-on/SKILL.md) | Installs or enables the `vibe-wise` plugin if needed, then starts its learning mode in the current session by reading the plugin's guide from disk, so it works before a restart and in clients that don't list `/vibe-wise:learn` |
 | [`windows-context-menu`](skills/windows-context-menu/SKILL.md) | Adds, places and de-duplicates Explorer right-click entries through the registry, and keeps a ledger of every custom one |
 
 `arena` and `blast-radius` are adapted from pstack (MIT), with its dead `~/.cursor/rules` and "principle skill" references stripped out.

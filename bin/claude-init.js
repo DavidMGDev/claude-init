@@ -102,6 +102,7 @@ const DEFAULT_OFF = new Set([
   "windows-context-menu",
   "steer-resume",
   "vibe-wise",
+  "vibe-wise-on",
 ]);
 
 const REMOTE_SKILLS = [
